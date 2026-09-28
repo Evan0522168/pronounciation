@@ -1,1114 +1,554 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國語字音字形練習網頁</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #f4f6f9;
-            --card-bg: #ffffff;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #10b981;
-            --success-hover: #059669;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --text-main: #1f2937;
-            --text-sub: #4b5563;
-            --border: #e5e7eb;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 24px 16px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 24px;
-            width: 100%;
-            max-width: 680px;
-        }
-
-        h1 {
-            font-size: 26px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 16px;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-container {
-            display: flex;
-            background: #e2e8f0;
-            padding: 4px;
-            border-radius: 12px;
-            gap: 4px;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .nav-tab {
-            flex: 1;
-            padding: 10px 16px;
-            border: none;
-            background: transparent;
-            font-size: 15px;
-            font-weight: 500;
-            color: #64748b;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .nav-tab.active {
-            background: #ffffff;
-            color: var(--primary);
-            font-weight: 700;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-        }
-
-        .main-container {
-            width: 100%;
-            max-width: 680px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            padding: 32px 24px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
-        }
-
-        /* Progress Bar */
-        .progress-bar-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: var(--text-sub);
-            font-weight: 500;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .badge-pending { background: #fef3c7; color: #d97706; }
-        .badge-done { background: #d1fae5; color: #059669; }
-
-        /* Flashcard Layout */
-        .card-perspective {
-            perspective: 1000px;
-            width: 100%;
-            height: 240px;
-            margin-bottom: 24px;
-            cursor: pointer;
-        }
-
-        .flashcard {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 16px;
-        }
-
-        .flashcard.flipped {
-            transform: rotateY(180deg);
-        }
-
-        .card-front, .card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
-            border: 2px solid #f1f5f9;
-        }
-
-        .card-front {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8);
-        }
-
-        .card-back {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            transform: rotateY(180deg);
-            border-color: #bfdbfe;
-        }
-
-        .card-word {
-            font-size: 48px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 8px;
-        }
-
-        .card-hint {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-top: 8px;
-        }
-
-        .card-pinyin {
-            font-size: 32px;
-            font-weight: 700;
-            color: #2563eb;
-            margin-bottom: 8px;
-        }
-
-        .card-phrase {
-            font-size: 20px;
-            font-weight: 500;
-            color: #334155;
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-know {
-            background-color: var(--success);
-            color: white;
-        }
-        .btn-know:hover { background-color: var(--success-hover); }
-
-        .btn-unknow {
-            background-color: var(--danger);
-            color: white;
-        }
-        .btn-unknow:hover { background-color: var(--danger-hover); }
-
-        .btn-choice {
-            font-size: 28px;
-            padding: 18px;
-            border-radius: 16px;
-        }
-
-        /* Import/Export Box */
-        .io-container {
-            border-top: 1px dashed #cbd5e1;
-            padding-top: 20px;
-        }
-
-        .io-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 8px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 13px;
-            color: #334155;
-            resize: vertical;
-            margin-bottom: 10px;
-            background: #f8fafc;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: #ffffff;
-        }
-
-        .io-btn-row {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-secondary {
-            padding: 8px 16px;
-            background: #e2e8f0;
-            color: #334155;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-secondary:hover { background: #cbd5e1; }
-
-        /* Quiz Layout */
-        .quiz-card {
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .quiz-title {
-            font-size: 15px;
-            color: var(--text-sub);
-            margin-bottom: 16px;
-        }
-
-        .quiz-question-box {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .quiz-question-text {
-            font-size: 24px;
-            font-weight: 700;
-            color: #0f172a;
-            line-height: 1.5;
-        }
-
-        .quiz-target-char {
-            color: #2563eb;
-            font-size: 28px;
-            border-bottom: 2px solid #2563eb;
-            padding: 0 2px;
-        }
-
-        .result-box {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 14px;
-            text-align: left;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-box.correct {
-            background-color: #ecfdf5;
-            border: 1px solid #a7f3d0;
-            color: #065f46;
-        }
-
-        .result-box.wrong {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-        }
-
-        .result-status {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .result-detail {
-            font-size: 15px;
-            line-height: 1.8;
-            color: #334155;
-            background: #ffffff;
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .next-btn {
-            width: 100%;
-            margin-top: 16px;
-            background: #1e293b;
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-        }
-        .next-btn:hover { background: #0f172a; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>國語字音自主練習</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#17253d;background:#f3f6fb}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px}
+.wrap{max-width:730px;margin:auto}
+h1{font-size:clamp(23px,5vw,30px);margin:8px 0 5px}
+.sub{color:#53647c;margin:0 0 22px;line-height:1.6}
+.tabs,.actions,.tools{display:flex;gap:10px;flex-wrap:wrap}
+.tabs{margin:0 0 15px}
+button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:11px 16px;font-weight:650}
+button:focus-visible,textarea:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+.tab{background:#dfe7f3;color:#354760}
+.tab[aria-selected=true]{background:#2563eb;color:white}
+.panel{background:white;border:1px solid #e1e8f1;border-radius:19px;padding:clamp(18px,5vw,30px);box-shadow:0 12px 30px #23314d0b}
+.hidden{display:none!important}
+.counts{display:flex;justify-content:space-between;gap:8px;color:#486079;font-size:14px}
+.card{display:block;width:100%;min-height:220px;background:#f8fbff;border:2px solid #dce8fa;margin:18px 0;text-align:center;color:#17253d}
+.card .word{display:block;font-size:clamp(32px,8vw,49px);font-weight:750;line-height:1.35}
+.card .hint{display:block;color:#60728a;font-size:14px;margin-top:12px}
+.card.revealed{background:#eaf3ff}
+.actions button{flex:1;min-width:135px}
+.red{background:#e54848;color:white}
+.green{background:#07976d;color:white}
+.dark{background:#26384f;color:white}
+.secondary{background:#e5ecf5;color:#26384f}
+.tools{margin-top:23px;padding-top:20px;border-top:1px solid #e2e8f0}
+.tools>div{width:100%}
+textarea{width:100%;min-height:130px;border:1px solid #bdc9d9;border-radius:10px;padding:12px;font:14px/1.6 ui-monospace,monospace;resize:vertical}
+label{font-weight:650;display:block;margin-bottom:8px}
+.note,.status{font-size:13px;color:#53647c;line-height:1.6;margin:10px 0}
+.status{min-height:1.5em}
+.question{text-align:center;background:#f8fbff;border:2px solid #dce8fa;border-radius:14px;padding:28px 16px;font-size:clamp(22px,5vw,29px);font-weight:700;line-height:1.7;margin:18px 0}
+.target{color:#175dc9;text-decoration:underline;text-underline-offset:5px}
+.answer{border-radius:12px;padding:17px;background:#ecfdf5;line-height:1.8;margin-top:20px}
+.answer.wrong{background:#fff0f0}
+.answer p{margin:5px 0}
+.footer{margin-top:18px;color:#60728a;font-size:13px;line-height:1.7}
+.footer a{color:#1558c1}
+</style>
 </head>
 <body>
+<main class="wrap">
+  <h1>國語字音自主練習</h1>
+  <p class="sub">先看詞組想讀音，選擇「已學會」或「再練一次」後顯示答案，再進入下一張；是非題比較兩個標示字的讀音。</p>
 
-    <header>
-        <h1>國語字音字形自主練習系統</h1>
-        <div class="nav-container">
-            <button class="nav-tab active" onclick="switchTab('flashcard')">閃卡模式</button>
-            <button class="nav-tab" onclick="switchTab('quiz')">是非題練習</button>
-        </div>
-    </header>
+  <div class="tabs" role="tablist">
+    <button id="tab-card" class="tab" role="tab" aria-selected="true" aria-controls="panel-card">閃卡</button>
+    <button id="tab-quiz" class="tab" role="tab" aria-selected="false" aria-controls="panel-quiz">是非題</button>
+  </div>
 
-    <div class="main-container">
-        
-        <!-- FLASHCARD SECTION -->
-        <div id="flashcard-section" class="section active">
-            <div class="progress-bar-container">
-                <span class="badge badge-pending" id="count-pending">還沒會：0</span>
-                <span class="badge badge-done" id="count-done">已經會：0</span>
-            </div>
-
-            <div class="card-perspective" onclick="flipFlashcard()">
-                <div class="flashcard" id="fc-card">
-                    <div class="card-front">
-                        <div class="card-word" id="fc-word">載入中</div>
-                        <div class="card-hint">（點擊卡片顯示正確讀音）</div>
-                    </div>
-                    <div class="card-back">
-                        <div class="card-pinyin" id="fc-pinyin">讀音</div>
-                        <div class="card-phrase" id="fc-phrase">詞組</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="btn-row">
-                <button class="btn btn-unknow" onclick="answerFlashcard(false)">還沒記住 ❌</button>
-                <button class="btn btn-know" onclick="answerFlashcard(true)">已經學會 ⭕</button>
-            </div>
-
-            <div class="io-container">
-                <div class="io-title">進度文字匯入 / 匯出 (格式同原始輸入文字)</div>
-                <textarea id="io-textarea" placeholder="在此處貼上文字進行匯入，或點擊匯出複製目前剩餘的範圍..."></textarea>
-                <div class="io-btn-row">
-                    <button class="btn-secondary" onclick="exportText()">複製目前範圍 (匯出)</button>
-                    <button class="btn-secondary" onclick="importText()">載入文字 (匯入)</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- QUIZ SECTION -->
-        <div id="quiz-section" class="section">
-            <div class="quiz-card">
-                <div class="quiz-title">請判斷下方兩個字詞中的目標字，其【注音/讀音】是否相同：</div>
-                
-                <div class="quiz-question-box">
-                    <div class="quiz-question-text" id="quiz-question-display">
-                        題目：「腊」臘肉／「蜡」蜡賓
-                    </div>
-                </div>
-
-                <div class="btn-row" id="quiz-btn-row">
-                    <button class="btn btn-know btn-choice" onclick="submitQuiz(true)">⭕ 相同</button>
-                    <button class="btn btn-unknow btn-choice" onclick="submitQuiz(false)">❌ 不同</button>
-                </div>
-
-                <div class="result-box" id="quiz-result-box">
-                    <div class="result-status" id="quiz-result-status"></div>
-                    <div class="result-detail" id="quiz-result-detail"></div>
-                    <button class="next-btn" onclick="generateQuiz()">下一題 ➔</button>
-                </div>
-            </div>
-        </div>
-
+  <section class="panel" id="panel-card" role="tabpanel" aria-labelledby="tab-card">
+    <div class="counts">
+      <span id="pending">待複習：0</span>
+      <span id="done">已學會：0</span>
     </div>
+    <button class="card" id="card" aria-label="翻開閃卡">
+      <span class="word" id="card-word"></span>
+      <span class="hint" id="card-hint"></span>
+    </button>
+    <div class="actions">
+      <button class="red" id="again">再練一次</button>
+      <button class="green" id="know">已學會</button>
+    </div>
+    <button id="next-card" class="dark hidden" style="width:100%;margin-top:12px">下一張</button>
 
-    <script>
-        // Raw dataset formatted row by row. Each row is a cluster of phonetically or visually related words.
-        // Format: [ { char, phrase, pinyin } ]
-        const defaultRawText = `字音
-椸施（施及）
-麃轆簏
-甃湫愀
-嘏葭
-縐芻謅
-罾矰甑
-亢頏
-僦憱蹴
-邳抔
-睥
-菲（菲衣薄食）緋腓
-詘
-剄痙
-磽蹺
-轓墦播
-佁
-窬
-遁楯
-哆（披哆）黟
-扃
-齜髭訾（訾議）（財訾）眥
-閹（閹然）崦
-雹匏皰枹
-塿（培塿）簍鏤窶
-咯（咯血）
-蛉翎
-嫵廡憮（憮然）
-慳
-韋幃韙煒暐韞
-刳姱洿
-寥僇瘳醪繆（山川相繆／繆小姐／綢繆）蓼（蓼莪／紅蓼）
-倬踔
-俎疽趄苴齟咀菹（菹醢）
-醅踣培掊（一掊土／掊斗折衡）
-蹩
-餂
-歆諳闇
-俛浼
-戧愴傖
-赭渚翥楮
-妗衾
-鼴
-腊踖蜡
-憒
-懧
-衢癯瞿（瞿先生／瞿然）攫
-帑呶孥
-邅饘蟺
-驁聱
-庋跂忮
-梧寤圄齬
-縞嚆皜鎬
-廋庾
-蹇謇騫搴褰
-闐瑱瞋嗔
-鯫諏陬
-黥黔
-啗萏閻
-儔擣鑄
-鬑髡
-裾据琚踞倨
-觭掎踦
-遽噱（發噱）璩
-顓遄
-曷愒
-垓欬（謦欬）頦
-倡（倡優）娼
-拂怫
-胛匣
-湄
-齎虀薺
-槊
-晡逋餔脯
-蒹縑慊（慊慊／不慊於心）
-羝坻詆
-豳遯圂燹豕
-酹醨
-倔（倔強）淈
-涘俟騃欸
-劬雊痀姁
-槎瘥嵯
-捋（捋髭鬚／捋虎鬚／揎拳捋袖）埒酹
-隅喁顒
-帩誚綃
-逶
-峻浚悛
-毖毗貔
-鏑嘀擿
-檄繳（弓繳）
-孚桴莩
-瞳艟幢
-咷洮佻晁
-竑紘閎
-蹬
-綸掄淪
-罍纍壘（神荼鬱壘）
-掏
-嫘縲
-舴怍阼酢
-儋澹
-鈿畦
-洒哂
-姮揎
-摶`;
+    <div class="tools">
+      <div>
+        <label for="input">匯入／匯出待複習字音</label>
+        <textarea id="input" placeholder="每行一組，例如：峻浚悛；或「峻|ㄐㄩㄣˋ|嚴峻 浚|ㄐㄩㄣˋ|浚渫」"></textarea>
+        <p class="note">匯出只包含待複習項目，格式為「字｜注音｜詞組」，可直接貼回載入。匯入只接受內建題庫中已核對的詞組與讀音，未確認的新資料不會自動出題。進度會儲存在這台裝置的瀏覽器。</p>
+        <div class="actions">
+          <button class="secondary" id="export">匯出待複習</button>
+          <button class="secondary" id="import">載入文字</button>
+          <button class="secondary" id="reset">重設為完整題庫</button>
+        </div>
+        <p id="status" class="status" role="status"></p>
+      </div>
+    </div>
+  </section>
 
-        // Database with strict single pronunciation mapping for each target word/phrase
-        const phoneticDict = {
-            "椸": { pinyin: "ㄧˊ", phrase: "椸架" },
-            "施及": { char: "施", pinyin: "ㄧˋ", phrase: "施及" },
-            "麃": { pinyin: "ㄅㄧㄠ", phrase: "麃麃" },
-            "轆": { pinyin: "ㄌㄨˋ", phrase: "轆轤" },
-            "簏": { pinyin: "ㄌㄨˋ", phrase: "竹簏" },
-            "甃": { pinyin: "ㄓㄡˋ", phrase: "井甃" },
-            "湫": { pinyin: "ㄑㄧㄡ", phrase: "湫隘" },
-            "愀": { pinyin: "ㄑㄧㄠˇ", phrase: "愀然" },
-            "嘏": { pinyin: "ㄍㄨˇ", phrase: "祝嘏" },
-            "葭": { pinyin: "ㄐㄧㄚ", phrase: "蒹葭" },
-            "縐": { pinyin: "ㄓㄡˋ", phrase: "縐紗" },
-            "芻": { pinyin: "ㄔㄨ", phrase: "芻議" },
-            "謅": { pinyin: "ㄗㄡ", phrase: "胡謅" },
-            "罾": { pinyin: "ㄗㄥ", phrase: "魚罾" },
-            "矰": { pinyin: "ㄗㄥ", phrase: "矰繳" },
-            "甑": { pinyin: "ㄗㄥˋ", phrase: "甑塵釜魚" },
-            "亢": { pinyin: "ㄎㄤˋ", phrase: "高亢" },
-            "頏": { pinyin: "ㄏㄤˊ", phrase: "頡頏" },
-            "僦": { pinyin: "ㄐㄧㄡˋ", phrase: "僦屋" },
-            "憱": { pinyin: "ㄘㄨˋ", phrase: "憱爾" },
-            "蹴": { pinyin: "ㄘㄨˋ", phrase: "蹴踏" },
-            "邳": { pinyin: "ㄆㄟˊ", phrase: "邳州" },
-            "抔": { pinyin: "ㄆㄡˊ", phrase: "一抔土" },
-            "睥": { pinyin: "ㄅㄧˋ", phrase: "睥睨" },
-            "菲": { pinyin: "ㄈㄟ", phrase: "菲薄" },
-            "菲衣薄食": { char: "菲", pinyin: "ㄈㄟˇ", phrase: "菲衣薄食" },
-            "緋": { pinyin: "ㄈㄟ", phrase: "緋紅" },
-            "腓": { pinyin: "ㄈㄟˊ", phrase: "腓腸肌" },
-            "詘": { pinyin: "ㄑㄩ", phrase: "詰詘" },
-            "剄": { pinyin: "ㄐㄧㄥˇ", phrase: "自剄" },
-            "痙": { pinyin: "ㄐㄧㄥˋ", phrase: "痙攣" },
-            "磽": { pinyin: "ㄑㄧㄠ", phrase: "磽瘠" },
-            "蹺": { pinyin: "ㄑㄧㄠ", phrase: "蹺蹺板" },
-            "轓": { pinyin: "ㄈㄢ", phrase: "朱轓" },
-            "墦": { pinyin: "ㄈㄢˊ", phrase: "墦間" },
-            "播": { pinyin: "ㄅㄛˋ", phrase: "播種" },
-            "佁": { pinyin: "ㄧˇ", phrase: "佁然" },
-            "窬": { pinyin: "ㄩˊ", phrase: "穿窬" },
-            "遁": { pinyin: "ㄉㄨㄣˋ", phrase: "遁逃" },
-            "楯": { pinyin: "ㄕㄨㄣˇ", phrase: "欄楯" },
-            "哆": { pinyin: "ㄉㄨㄛ", phrase: "哆嗦" },
-            "披哆": { char: "哆", pinyin: "ㄔˇ", phrase: "披哆" },
-            "黟": { pinyin: "ㄧ", phrase: "黟縣" },
-            "扃": { pinyin: "ㄐㄧㄥ", phrase: "扃門" },
-            "齜": { pinyin: "ㄗ", phrase: "齜牙" },
-            "髭": { pinyin: "ㄗ", phrase: "髭鬚" },
-            "訾": { pinyin: "ㄗˇ", phrase: "訾議" },
-            "訾議": { char: "訾", pinyin: "ㄗˇ", phrase: "訾議" },
-            "財訾": { char: "訾", pinyin: "ㄗ", phrase: "財訾" },
-            "眥": { pinyin: "ㄗˋ", phrase: "眼眥" },
-            "閹": { pinyin: "ㄧㄢ", phrase: "閹割" },
-            "閹然": { char: "閹", pinyin: "ㄧㄢ", phrase: "閹然" },
-            "崦": { pinyin: "ㄧㄢ", phrase: "崦嵁" },
-            "雹": { pinyin: "ㄅㄠˊ", phrase: "冰雹" },
-            "匏": { pinyin: "ㄆㄠˊ", phrase: "匏瓜" },
-            "皰": { pinyin: "ㄆㄠˋ", phrase: "面皰" },
-            "枹": { pinyin: "ㄈㄨˊ", phrase: "鼓枹" },
-            "塿": { pinyin: "ㄌㄡˇ", phrase: "培塿" },
-            "培塿": { char: "塿", pinyin: "ㄌㄡˇ", phrase: "培塿" },
-            "簍": { pinyin: "ㄌㄡˇ", phrase: "竹簍" },
-            "鏤": { pinyin: "ㄌㄡˋ", phrase: "鏤刻" },
-            "窶": { pinyin: "ㄐㄩˋ", phrase: "貧窶" },
-            "咯": { pinyin: "ㄍㄜ", phrase: "咯咯" },
-            "咯血": { char: "咯", pinyin: "ㄎㄚˇ", phrase: "咯血" },
-            "蛉": { pinyin: "ㄌㄧㄥˊ", phrase: "螟蛉" },
-            "翎": { pinyin: "ㄌㄧㄥˊ", phrase: "羽翎" },
-            "嫵": { pinyin: "ㄨˇ", phrase: "嫵媚" },
-            "廡": { pinyin: "ㄨˇ", phrase: "廊廡" },
-            "憮": { pinyin: "ㄨˇ", phrase: "憮然" },
-            "憮然": { char: "憮", pinyin: "ㄨˇ", phrase: "憮然" },
-            "慳": { pinyin: "ㄑㄧㄢ", phrase: "慳吝" },
-            "韋": { pinyin: "ㄨㄟˊ", phrase: "韋編" },
-            "幃": { pinyin: "ㄨㄟˊ", phrase: "帷幃" },
-            "韙": { pinyin: "ㄨㄟˇ", phrase: "大不韙" },
-            "煒": { pinyin: "ㄨㄟˇ", phrase: "煒燁" },
-            "暐": { pinyin: "ㄨㄟˇ", phrase: "暐暐" },
-            "韞": { pinyin: "ㄩㄣˋ", phrase: "韞櫝" },
-            "刳": { pinyin: "ㄎㄨ", phrase: "刳木" },
-            "姱": { pinyin: "ㄎㄨㄚ", phrase: "姱容" },
-            "洿": { pinyin: "ㄨ", phrase: "洿池" },
-            "寥": { pinyin: "ㄌㄧㄠˊ", phrase: "寂寥" },
-            "僇": { pinyin: "ㄌㄨˋ", phrase: "僇人" },
-            "瘳": { pinyin: "ㄔㄡ", phrase: "痊瘳" },
-            "醪": { pinyin: "ㄌㄠˊ", phrase: "濁醪" },
-            "繆": { pinyin: "ㄇㄧㄡˋ", phrase: "荒謬" },
-            "山川相繆": { char: "繆", pinyin: "ㄌㄧㄠˊ", phrase: "山川相繆" },
-            "繆小姐": { char: "繆", pinyin: "ㄇㄧㄠˋ", phrase: "繆小姐" },
-            "綢繆": { char: "繆", pinyin: "ㄇㄡˊ", phrase: "綢繆" },
-            "蓼": { pinyin: "ㄌㄧㄠˇ", phrase: "紅蓼" },
-            "蓼莪": { char: "蓼", pinyin: "ㄌㄨˋ", phrase: "蓼莪" },
-            "紅蓼": { char: "蓼", pinyin: "ㄌㄧㄠˇ", phrase: "紅蓼" },
-            "倬": { pinyin: "ㄓㄨㄛ", phrase: "倬立" },
-            "踔": { pinyin: "ㄓㄨㄛ", phrase: "踔厲" },
-            "俎": { pinyin: "ㄗㄨˇ", phrase: "俎豆" },
-            "疽": { pinyin: "ㄐㄩ", phrase: "癰疽" },
-            "趄": { pinyin: "ㄐㄩ", phrase: "趑趄" },
-            "苴": { pinyin: "ㄐㄩ", phrase: "履苴" },
-            "齟": { pinyin: "ㄐㄩˇ", phrase: "齟齬" },
-            "咀": { pinyin: "ㄐㄩˇ", phrase: "咀嚼" },
-            "菹": { pinyin: "ㄗㄨ", phrase: "菹醢" },
-            "菹醢": { char: "菹", pinyin: "ㄗㄨ", phrase: "菹醢" },
-            "醅": { pinyin: "ㄆㄟ", phrase: "濁醅" },
-            "踣": { pinyin: "ㄅㄛˊ", phrase: "踣地" },
-            "培": { pinyin: "ㄆㄟˊ", phrase: "培育" },
-            "掊": { pinyin: "ㄆㄡˊ", phrase: "一掊土" },
-            "一掊土": { char: "掊", pinyin: "ㄆㄡˊ", phrase: "一掊土" },
-            "掊斗折衡": { char: "掊", pinyin: "ㄆㄡˇ", phrase: "掊斗折衡" },
-            "蹩": { pinyin: "ㄅㄧㄝˊ", phrase: "蹩腳" },
-            "餂": { pinyin: "ㄊㄧㄢˇ", phrase: "餂誘" },
-            "歆": { pinyin: "ㄒㄧㄣ", phrase: "歆羨" },
-            "諳": { pinyin: "ㄢ", phrase: "諳熟" },
-            "闇": { pinyin: "ㄢˋ", phrase: "闇練" },
-            "俛": { pinyin: "ㄈㄨˇ", phrase: "俛首" },
-            "浼": { pinyin: "ㄇㄟˇ", phrase: "浼托" },
-            "戧": { pinyin: "ㄑㄧㄤˋ", phrase: "戧金" },
-            "愴": { pinyin: "ㄔㄨㄤˋ", phrase: "悲愴" },
-            "傖": { pinyin: "ㄘㄤ", phrase: "傖俗" },
-            "赭": { pinyin: "ㄓㄜˇ", phrase: "赭石" },
-            "渚": { pinyin: "ㄓㄨˇ", phrase: "江渚" },
-            "翥": { pinyin: "ㄓㄨˋ", phrase: "翱翥" },
-            "楮": { pinyin: "ㄔㄨˇ", phrase: "楮幣" },
-            "妗": { pinyin: "ㄐㄧㄣˋ", phrase: "舅妗" },
-            "衾": { pinyin: "ㄑㄧㄣ", phrase: "衾枕" },
-            "鼴": { pinyin: "ㄧㄢˇ", phrase: "鼴鼠" },
-            "腊": { pinyin: "ㄒㄧ̄", phrase: "腊肉" },
-            "踖": { pinyin: "ㄐㄧˊ", phrase: "踖踖" },
-            "蜡": { pinyin: "ㄓㄚˋ", phrase: "蜡賓" },
-            "憒": { pinyin: "ㄎㄨㄟˋ", phrase: "昏憒" },
-            "懧": { pinyin: "ㄋㄨㄛˋ", phrase: "怯懧" },
-            "衢": { pinyin: "ㄑㄩ", phrase: "通衢" },
-            "癯": { pinyin: "ㄑㄩ", phrase: "清癯" },
-            "瞿": { pinyin: "ㄑㄩˊ", phrase: "瞿姓" },
-            "瞿先生": { char: "瞿", pinyin: "ㄑㄩˊ", phrase: "瞿先生" },
-            "瞿然": { char: "瞿", pinyin: "ㄐㄩˋ", phrase: "瞿然" },
-            "攫": { pinyin: "ㄐㄩㄝˊ", phrase: "攫取" },
-            "帑": { pinyin: "ㄊㄤˇ", phrase: "帑藏" },
-            "呶": { pinyin: "ㄋㄠˊ", phrase: "呶呶" },
-            "孥": { pinyin: "ㄋㄨˊ", phrase: "妻孥" },
-            "邅": { pinyin: "ㄓㄢ", phrase: "邅回" },
-            "饘": { pinyin: "ㄓㄢ", phrase: "饘粥" },
-            "蟺": { pinyin: "ㄕㄢ", phrase: "蚯蟺" },
-            "驁": { pinyin: "ㄠˊ", phrase: "桀驁" },
-            "聱": { pinyin: "ㄠˊ", phrase: "聱牙" },
-            "庋": { pinyin: "ㄍㄨㄟˇ", phrase: "庋藏" },
-            "跂": { pinyin: "ㄑㄧˇ", phrase: "跂望" },
-            "忮": { pinyin: "ㄓˋ", phrase: "忮求" },
-            "梧": { pinyin: "ㄨˊ", phrase: "梧桐" },
-            "寤": { pinyin: "ㄨˋ", phrase: "寤寐" },
-            "圄": { pinyin: "ㄩˇ", phrase: "囹圄" },
-            "齬": { pinyin: "ㄩˇ", phrase: "齟齬" },
-            "縞": { pinyin: "ㄍㄠˇ", phrase: "縞素" },
-            "嚆": { pinyin: "ㄏㄠ", phrase: "嚆矢" },
-            "皜": { pinyin: "ㄏㄠˋ", phrase: "皜皜" },
-            "鎬": { pinyin: "ㄏㄠˇ", phrase: "鎬京" },
-            "廋": { pinyin: "ㄙㄡ", phrase: "廋詞" },
-            "庾": { pinyin: "ㄩˇ", phrase: "倉庾" },
-            "蹇": { pinyin: "ㄐㄧㄢˇ", phrase: "蹇滯" },
-            "謇": { pinyin: "ㄐㄧㄢˇ", phrase: "謇謇" },
-            "騫": { pinyin: "ㄑㄧㄢ", phrase: "騫騰" },
-            "搴": { pinyin: "ㄑㄧㄢ", phrase: "搴旗" },
-            "褰": { pinyin: "ㄑㄧㄢ", phrase: "褰裳" },
-            "闐": { pinyin: "ㄊㄧㄢˊ", phrase: "闐寂" },
-            "瑱": { pinyin: "ㄊㄧㄢˋ", phrase: "玉瑱" },
-            "瞋": { pinyin: "ㄔㄣ", phrase: "瞋目" },
-            "嗔": { pinyin: "ㄔㄣ", phrase: "嗔怪" },
-            "鯫": { pinyin: "ㄗㄡ", phrase: "鯫生" },
-            "諏": { pinyin: "ㄗㄡ", phrase: "諮諏" },
-            "陬": { pinyin: "ㄗㄡ", phrase: "角落" },
-            "黥": { pinyin: "ㄑㄧㄥˊ", phrase: "黥刑" },
-            "黔": { pinyin: "ㄑㄧㄢˊ", phrase: "黔首" },
-            "啗": { pinyin: "ㄉㄢˋ", phrase: "啗食" },
-            "萏": { pinyin: "ㄉㄢˋ", phrase: "菡萏" },
-            "閻": { pinyin: "ㄧㄢˊ", phrase: "閻羅" },
-            "儔": { pinyin: "ㄔㄡˊ", phrase: "儔類" },
-            "擣": { pinyin: "ㄉㄠˇ", phrase: "擣衣" },
-            "鑄": { pinyin: "ㄓㄨˋ", phrase: "鑄造" },
-            "鬑": { pinyin: "ㄌㄧㄢˊ", phrase: "鬑鬑" },
-            "髡": { pinyin: "ㄎㄨㄣ", phrase: "髡刑" },
-            "裾": { pinyin: "ㄐㄩ", phrase: "裙裾" },
-            "据": { pinyin: "ㄐㄩ", phrase: "拮据" },
-            "琚": { pinyin: "ㄐㄩ", phrase: "佩琚" },
-            "踞": { pinyin: "ㄐㄩˋ", phrase: "盤踞" },
-            "倨": { pinyin: "ㄐㄩˋ", phrase: "倨傲" },
-            "觭": { pinyin: "ㄐㄧ", phrase: "觭輪" },
-            "掎": { pinyin: "ㄐㄧˇ", phrase: "掎角之勢" },
-            "踦": { pinyin: "ㄐㄧ", phrase: "踦閭" },
-            "遽": { pinyin: "ㄐㄩˋ", phrase: "急遽" },
-            "噱": { pinyin: "ㄐㄩㄝˊ", phrase: "發噱" },
-            "發噱": { char: "噱", pinyin: "ㄐㄩㄝˊ", phrase: "發噱" },
-            "璩": { pinyin: "ㄑㄩˊ", phrase: "玉璩" },
-            "顓": { pinyin: "ㄓㄨㄢ", phrase: "顓頊" },
-            "遄": { pinyin: "ㄔㄨㄢˊ", phrase: "遄往" },
-            "曷": { pinyin: "ㄏㄜˊ", phrase: "曷勝" },
-            "愒": { pinyin: "ㄎㄞˋ", phrase: "玩歲愒日" },
-            "垓": { pinyin: "ㄍㄞ", phrase: "垓下" },
-            "欬": { pinyin: "ㄎㄞˋ", phrase: "謦欬" },
-            "謦欬": { char: "欬", pinyin: "ㄎㄞˋ", phrase: "謦欬" },
-            "頦": { pinyin: "ㄏㄞˊ", phrase: "頷頦" },
-            "倡": { pinyin: "ㄔㄤ", phrase: "倡優" },
-            "倡優": { char: "倡", pinyin: "ㄔㄤ", phrase: "倡優" },
-            "娼": { pinyin: "ㄔㄤ", phrase: "娼妓" },
-            "拂": { pinyin: "ㄈㄨˊ", phrase: "拂袖" },
-            "怫": { pinyin: "ㄈㄨˊ", phrase: "怫然" },
-            "胛": { pinyin: "ㄐㄧㄚˇ", phrase: "肩胛" },
-            "匣": { pinyin: "ㄒㄧㄚˊ", phrase: "木匣" },
-            "湄": { pinyin: "ㄇㄟˊ", phrase: "水湄" },
-            "齎": { pinyin: "ㄐㄧ", phrase: "齎志" },
-            "虀": { pinyin: "ㄐㄧ", phrase: "斷虀畫粥" },
-            "薺": { pinyin: "ㄐㄧˋ", phrase: "薺菜" },
-            "槊": { pinyin: "ㄕㄨㄛˋ", phrase: "橫槊" },
-            "晡": { pinyin: "ㄅㄨ", phrase: "晡時" },
-            "逋": { pinyin: "ㄅㄨ", phrase: "逋逃" },
-            "餔": { pinyin: "ㄅㄨ", phrase: "餔啜" },
-            "脯": { pinyin: "ㄈㄨˇ", phrase: "肉脯" },
-            "蒹": { pinyin: "ㄐㄧㄢ", phrase: "蒹葭" },
-            "縑": { pinyin: "ㄐㄧㄢ", phrase: "縑帛" },
-            "慊": { pinyin: "ㄑㄧㄢˋ", phrase: "慊慊" },
-            "慊慊": { char: "慊", pinyin: "ㄑㄧㄢˋ", phrase: "慊慊" },
-            "不慊於心": { char: "慊", pinyin: "ㄑㄧㄝˋ", phrase: "不慊於心" },
-            "羝": { pinyin: "ㄉㄧ", phrase: "羝羊" },
-            "坻": { pinyin: "ㄔˊ", phrase: "渚坻" },
-            "詆": { pinyin: "ㄉㄧˇ", phrase: "詆毀" },
-            "豳": { pinyin: "ㄅㄧㄣ", phrase: "豳風" },
-            "遯": { pinyin: "ㄉㄨㄣˋ", phrase: "遯世" },
-            "圂": { pinyin: "ㄏㄨㄣˋ", phrase: "豬圂" },
-            "燹": { pinyin: "ㄒㄧㄢˇ", phrase: "兵燹" },
-            "豕": { pinyin: "ㄕˇ", phrase: "豕突" },
-            "酹": { pinyin: "ㄌㄟˋ", phrase: "奠酹" },
-            "醨": { pinyin: "ㄌㄧˊ", phrase: "薄醨" },
-            "倔": { pinyin: "ㄐㄩㄝˊ", phrase: "倔強" },
-            "倔強": { char: "倔", pinyin: "ㄐㄩㄝˊ", phrase: "倔強" },
-            "淈": { pinyin: "ㄍㄨˇ", phrase: "淈泥" },
-            "涘": { pinyin: "ㄙˋ", phrase: "水涘" },
-            "俟": { pinyin: "ㄙˋ", phrase: "俟機" },
-            "騃": { pinyin: "ㄞˊ", phrase: "騃呆" },
-            "欸": { pinyin: "ㄞˇ", phrase: "欸乃" },
-            "劬": { pinyin: "ㄑㄩˊ", phrase: "劬勞" },
-            "雊": { pinyin: "ㄍㄡˋ", phrase: "雉雊" },
-            "痀": { pinyin: "ㄐㄩ", phrase: "痀僂" },
-            "姁": { pinyin: "ㄒㄩˇ", phrase: "姁姁" },
-            "槎": { pinyin: "ㄔㄚ", phrase: "木槎" },
-            "瘥": { pinyin: "ㄔㄞ", phrase: "病瘥" },
-            "嵯": { pinyin: "ㄘㄨㄛ", phrase: "嵯峨" },
-            "捋": { pinyin: "ㄌㄨㄛ̄", phrase: "捋鬚" },
-            "捋髭鬚": { char: "捋", pinyin: "ㄌㄨㄛ̄", phrase: "捋髭鬚" },
-            "捋虎鬚": { char: "捋", pinyin: "ㄌㄨㄛ̄", phrase: "捋虎鬚" },
-            "揎拳捋袖": { char: "捋", pinyin: "ㄌㄨㄛ̄", phrase: "揎拳捋袖" },
-            "埒": { pinyin: "ㄌㄧㄝˋ", phrase: "等埒" },
-            "隅": { pinyin: "ㄩ", phrase: "角落" },
-            "喁": { pinyin: "ㄩˊ", phrase: "喁喁" },
-            "顒": { pinyin: "ㄩㄥˊ", phrase: "顒顒" },
-            "帩": { pinyin: "ㄑㄧㄠˋ", phrase: "帩頭" },
-            "誚": { pinyin: "ㄑㄧㄠˋ", phrase: "誚讓" },
-            "綃": { pinyin: "ㄒㄧㄠ", phrase: "生綃" },
-            "逶": { pinyin: "ㄨㄟ", phrase: "逶迤" },
-            "峻": { pinyin: "ㄐㄩㄣ", phrase: "嚴峻" },
-            "浚": { pinyin: "ㄐㄩㄣ", phrase: "浚渫" },
-            "悛": { pinyin: "ㄑㄩㄢ", phrase: "悔悛" },
-            "毖": { pinyin: "ㄅㄧˋ", phrase: "懲前毖後" },
-            "毗": { pinyin: "ㄆㄧˊ", phrase: "毗鄰" },
-            "貔": { pinyin: "ㄆㄧ", phrase: "貔貅" },
-            "鏑": { pinyin: "ㄉㄧˊ", phrase: "鳴鏑" },
-            "嘀": { pinyin: "ㄉㄧˊ", phrase: "嘀咕" },
-            "擿": { pinyin: "ㄓˋ", phrase: "擿伏" },
-            "檄": { pinyin: "ㄒㄧˊ", phrase: "檄文" },
-            "繳": { pinyin: "ㄓㄨㄛˊ", phrase: "弓繳" },
-            "弓繳": { char: "繳", pinyin: "ㄓㄨㄛˊ", phrase: "弓繳" },
-            "孚": { pinyin: "ㄈㄨˊ", phrase: "深孚" },
-            "桴": { pinyin: "ㄈㄨˊ", phrase: "鼓桴" },
-            "莩": { pinyin: "ㄆㄧㄠˇ", phrase: "餓莩" },
-            "瞳": { pinyin: "ㄊㄨㄥˊ", phrase: "瞳孔" },
-            "艟": { pinyin: "ㄊㄨㄥˊ", phrase: "艨艟" },
-            "幢": { pinyin: "ㄔㄨㄤˊ", phrase: "幢幢" },
-            "咷": { pinyin: "ㄊㄠ", phrase: "號咷" },
-            "洮": { pinyin: "ㄊㄠˊ", phrase: "洮米" },
-            "佻": { pinyin: "ㄊㄧㄠ", phrase: "輕佻" },
-            "晁": { pinyin: "ㄔㄠˊ", phrase: "晁氏" },
-            "竑": { pinyin: "ㄏㄨㄥˊ", phrase: "竑偉" },
-            "紘": { pinyin: "ㄏㄨㄥˊ", phrase: "冠紘" },
-            "閎": { pinyin: "ㄏㄨㄥˊ", phrase: "閎偉" },
-            "蹬": { pinyin: "ㄉㄥ", phrase: "蹬腿" },
-            "綸": { pinyin: "ㄍㄨㄢ", phrase: "羽扇綸巾" },
-            "掄": { pinyin: "ㄌㄨㄣ", phrase: "掄拳" },
-            "淪": { pinyin: "ㄌㄨㄣ", phrase: "淪陷" },
-            "罍": { pinyin: "ㄌㄟˊ", phrase: "尊罍" },
-            "纍": { pinyin: "ㄌㄟˊ", phrase: "纍纍" },
-            "壘": { pinyin: "ㄌㄩˇ", phrase: "神荼鬱壘" },
-            "神荼鬱壘": { char: "壘", pinyin: "ㄌㄩˇ", phrase: "神荼鬱壘" },
-            "掏": { pinyin: "ㄊㄠ", phrase: "掏腰包" },
-            "嫘": { pinyin: "ㄌㄟˊ", phrase: "嫘祖" },
-            "縲": { pinyin: "ㄌㄟˊ", phrase: "縲紲" },
-            "舴": { pinyin: "ㄗㄜˊ", phrase: "舴艋" },
-            "怍": { pinyin: "ㄗㄨㄛˋ", phrase: "慚怍" },
-            "阼": { pinyin: "ㄗㄨㄛˋ", phrase: "阼階" },
-            "酢": { pinyin: "ㄗㄨㄛˋ", phrase: "酬酢" },
-            "儋": { pinyin: "ㄉㄢ", phrase: "儋州" },
-            "澹": { pinyin: "ㄉㄢˋ", phrase: "澹泊" },
-            "鈿": { pinyin: "ㄉㄧㄢˋ", phrase: "釵鈿" },
-            "畦": { pinyin: "ㄑㄧˊ", phrase: "田畦" },
-            "洒": { pinyin: "ㄙㄚˇ", phrase: "洒水" },
-            "哂": { pinyin: "ㄕㄣˇ", phrase: "哂笑" },
-            "姮": { pinyin: "ㄏㄥˊ", phrase: "姮娥" },
-            "揎": { pinyin: "ㄒㄩㄢ", phrase: "揎袖" },
-            "摶": { pinyin: "ㄊㄨㄢˊ", phrase: "摶扶搖" }
-        };
+  <section class="panel hidden" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz">
+    <div class="counts">
+      <span id="quiz-count">第 1 題</span>
+      <span id="quiz-score">答對 0 題</span>
+    </div>
+    <p class="sub">標示的兩個字，讀音是否相同？</p>
+    <div class="question" id="question"></div>
+    <div class="actions" id="choices">
+      <button class="green" id="same">⭕ 相同</button>
+      <button class="red" id="different">❌ 不同</button>
+    </div>
+    <div id="feedback" class="answer hidden" aria-live="polite"></div>
+    <button id="next" class="dark hidden" style="width:100%;margin-top:14px">下一題</button>
+  </section>
 
-        // Parser for user's row format
-        function parseRawTextToClusters(text) {
-            const lines = text.split('\n');
-            const clusters = [];
+  <p class="footer">
+    字音以教育部辭典為校對基準；罕見字與古籍語詞請依所考詞義核對。
+    <a href="https://dict.concised.moe.edu.tw/" target="_blank" rel="noopener">國語辭典簡編本</a> ·
+    <a href="https://dict.revised.moe.edu.tw/" target="_blank" rel="noopener">重編國語辭典修訂本</a>
+  </p>
+</main>
 
-            for (let line of lines) {
-                line = line.trim();
-                if (!line || line === "字音") continue;
+<script>
+// 資料格式：目標字|注音|詞組。同一行的項目會互相組成是非題。
+const DATA=`椸|ㄧˊ|椸架 施|ㄧˋ|施及
+麃|ㄅㄧㄠ|麃麃 轆|ㄌㄨˋ|轆轤 簏|ㄌㄨˋ|竹簏
+甃|ㄓㄡˋ|井甃 湫|ㄐㄧㄠˇ|湫隘 愀|ㄑㄧㄠˇ|愀然
+嘏|ㄍㄨˇ|祝嘏 葭|ㄐㄧㄚ|蒹葭
+縐|ㄓㄡˋ|縐紗 芻|ㄔㄨˊ|芻議 謅|ㄗㄡ|胡謅
+罾|ㄗㄥ|魚罾 矰|ㄗㄥ|矰繳 甑|ㄗㄥˋ|甑塵釜魚
+亢|ㄎㄤˋ|高亢 頏|ㄏㄤˊ|頡頏
+僦|ㄐㄧㄡˋ|僦屋 憱|ㄘㄨˋ|憱爾 蹴|ㄘㄨˋ|蹴踏
+邳|ㄆㄟˊ|邳州 抔|ㄆㄡˊ|一抔土
+睥|ㄅㄧˋ|睥睨
+菲|ㄈㄟˇ|菲衣薄食 緋|ㄈㄟ|緋紅 腓|ㄈㄟˊ|腓腸肌
+詘|ㄑㄩ|詰詘
+剄|ㄐㄧㄥˇ|自剄 痙|ㄐㄧㄥˋ|痙攣
+磽|ㄑㄧㄠ|磽瘠 蹺|ㄑㄧㄠ|蹺蹺板
+轓|ㄈㄢ|朱轓 墦|ㄈㄢˊ|墦間 播|ㄅㄛˋ|播種
+佁|ㄞˇ|佁然
+窬|ㄩˊ|穿窬
+遁|ㄉㄨㄣˋ|遁逃 楯|ㄕㄨㄣˇ|欄楯
+哆|ㄔㄜˇ|披哆 黟|ㄧ|黟縣
+扃|ㄐㄩㄥ|扃門
+齜|ㄗ|齜牙 髭|ㄗ|髭鬚 訾|ㄗˇ|訾議 訾|ㄗ|財訾 眥|ㄗˋ|眼眥
+閹|ㄧㄢ|閹然 崦|ㄧㄢ|崦嵁
+雹|ㄅㄠˊ|冰雹 匏|ㄆㄠˊ|匏瓜 皰|ㄆㄠˋ|面皰 枹|ㄈㄨˊ|鼓枹
+塿|ㄌㄡˇ|培塿 簍|ㄌㄡˇ|竹簍 鏤|ㄌㄡˋ|鏤刻 窶|ㄐㄩˋ|貧窶
+咯|ㄎㄚˇ|咯血
+蛉|ㄌㄧㄥˊ|螟蛉 翎|ㄌㄧㄥˊ|羽翎
+嫵|ㄨˇ|嫵媚 廡|ㄨˇ|廊廡 憮|ㄨˇ|憮然
+慳|ㄑㄧㄢ|慳吝
+韋|ㄨㄟˊ|韋編 幃|ㄨㄟˊ|帷幃 韙|ㄨㄟˇ|大不韙 煒|ㄨㄟˇ|煒燁 暐|ㄨㄟˇ|暐暐 韞|ㄩㄣˋ|韞櫝
+刳|ㄎㄨ|刳木 姱|ㄎㄨㄚ|姱容 洿|ㄨ|洿池
+寥|ㄌㄧㄠˊ|寂寥 僇|ㄌㄨˋ|僇人 瘳|ㄔㄡ|痊瘳 醪|ㄌㄠˊ|濁醪 繆|ㄌㄧㄠˊ|山川相繆 繆|ㄇㄧㄠˋ|繆小姐 繆|ㄇㄡˊ|綢繆 蓼|ㄌㄨˋ|蓼莪 蓼|ㄌㄧㄠˇ|紅蓼
+倬|ㄓㄨㄛˊ|倬立 踔|ㄓㄨㄛˊ|踔厲
+俎|ㄗㄨˇ|俎豆 疽|ㄐㄩ|癰疽 趄|ㄐㄩ|趑趄 苴|ㄐㄩˇ|履苴 齟|ㄐㄩˇ|齟齬 咀|ㄐㄩˇ|咀嚼 菹|ㄐㄩ|菹醢
+醅|ㄆㄟ|濁醅 踣|ㄅㄛˊ|踣地 培|ㄆㄟˊ|培育 掊|ㄆㄡˊ|掊坑 掊|ㄆㄡˇ|掊斗折衡
+蹩|ㄅㄧㄝˊ|蹩腳
+餂|ㄊㄧㄢˇ|餂誘
+歆|ㄒㄧㄣ|歆羨 諳|ㄢ|諳熟 闇|ㄢ|闇練
+俛|ㄈㄨˇ|俛首 浼|ㄇㄟˇ|浼托
+戧|ㄑㄧㄤˋ|戧金 愴|ㄔㄨㄤˋ|悲愴 傖|ㄘㄤ|傖俗
+赭|ㄓㄜˇ|赭石 渚|ㄓㄨˇ|江渚 翥|ㄓㄨˋ|翱翥 楮|ㄔㄨˇ|楮幣
+妗|ㄐㄧㄣˋ|舅妗 衾|ㄑㄧㄣ|衾枕
+鼴|ㄧㄢˇ|鼴鼠
+腊|ㄒㄧˊ|腊肉 踖|ㄐㄧˊ|踖踖 蜡|ㄓㄚˋ|蜡賓
+憒|ㄎㄨㄟˋ|昏憒
+懧|ㄋㄨㄛˋ|懧愚
+衢|ㄑㄩˊ|通衢 癯|ㄑㄩˊ|清癯 瞿|ㄑㄩ|瞿先生 瞿|ㄐㄩˋ|瞿然 攫|ㄐㄩㄝˊ|攫取
+帑|ㄊㄤˇ|帑藏 呶|ㄋㄠˊ|呶呶 孥|ㄋㄨˊ|妻孥
+邅|ㄓㄢ|邅回 饘|ㄓㄢ|饘粥 蟺|ㄕㄢˋ|蜿蟺
+驁|ㄠˊ|桀驁 聱|ㄠˊ|聱牙
+庋|ㄐㄧˇ|庋藏 跂|ㄑㄧˋ|跂望 忮|ㄓˋ|忮求
+梧|ㄨˊ|梧桐 寤|ㄨˋ|寤寐 圄|ㄩˇ|囹圄 齬|ㄩˇ|齟齬
+縞|ㄍㄠˇ|縞素 嚆|ㄏㄠ|嚆矢 皜|ㄏㄠˋ|皜皜 鎬|ㄏㄠˋ|鎬京
+廋|ㄙㄡ|廋詞 庾|ㄩˇ|倉庾
+蹇|ㄐㄧㄢˇ|蹇滯 謇|ㄐㄧㄢˇ|謇謇 騫|ㄑㄧㄢ|騫騰 搴|ㄑㄧㄢ|搴旗 褰|ㄑㄧㄢ|褰裳
+闐|ㄊㄧㄢˊ|闐寂 瑱|ㄊㄧㄢˋ|玉瑱 瞋|ㄔㄣ|瞋目 嗔|ㄔㄣ|嗔怪
+鯫|ㄗㄡ|鯫生 諏|ㄗㄡ|諮諏 陬|ㄗㄡ|陬隅
+黥|ㄑㄧㄥˊ|黥刑 黔|ㄑㄧㄢˊ|黔首
+啗|ㄉㄢˋ|啗食 萏|ㄉㄢˋ|菡萏 閻|ㄧㄢˊ|閻羅
+儔|ㄔㄡˊ|儔類 擣|ㄉㄠˇ|擣衣 鑄|ㄓㄨˋ|鑄造
+鬑|ㄌㄧㄢˊ|鬑鬑 髡|ㄎㄨㄣ|髡刑
+裾|ㄐㄩ|裙裾 据|ㄐㄩ|拮据 琚|ㄐㄩ|佩琚 踞|ㄐㄩˋ|盤踞 倨|ㄐㄩˋ|倨傲
+觭|ㄐㄧ|觭輪 掎|ㄐㄧˇ|掎角之勢
+遽|ㄐㄩˋ|急遽 噱|ㄐㄩㄝˊ|發噱 璩|ㄑㄩˊ|玉璩
+顓|ㄓㄨㄢ|顓頊 遄|ㄔㄨㄢˊ|遄往
+曷|ㄏㄜˊ|曷勝 愒|ㄎㄞˋ|玩歲愒日
+垓|ㄍㄞ|垓下 欬|ㄎㄞˋ|謦欬 頦|ㄏㄞˊ|頷頦
+倡|ㄔㄤ|倡優 娼|ㄔㄤ|娼妓
+拂|ㄈㄨˊ|拂袖 怫|ㄈㄟˋ|怫然
+胛|ㄐㄧㄚˇ|肩胛 匣|ㄒㄧㄚˊ|木匣
+湄|ㄇㄟˊ|水湄
+齎|ㄐㄧ|齎志 虀|ㄐㄧ|斷虀畫粥 薺|ㄐㄧˋ|薺菜
+槊|ㄕㄨㄛˋ|橫槊
+晡|ㄅㄨ|晡時 逋|ㄅㄨ|逋逃 餔|ㄅㄨ|餔啜 脯|ㄈㄨˇ|肉脯
+蒹|ㄐㄧㄢ|蒹葭 縑|ㄐㄧㄢ|縑帛 慊|ㄑㄧㄢˋ|慊慊 慊|ㄑㄧㄝˋ|不慊於心
+羝|ㄉㄧ|羝羊 坻|ㄔˊ|渚坻 詆|ㄉㄧˇ|詆毀
+豳|ㄅㄧㄣ|豳風 遯|ㄉㄨㄣˋ|遯世 圂|ㄏㄨㄣˋ|豬圂 燹|ㄒㄧㄢˇ|兵燹 豕|ㄕˇ|豕突
+酹|ㄌㄟˋ|奠酹 醨|ㄌㄧˊ|薄醨
+倔|ㄐㄩㄝˊ|倔強 淈|ㄍㄨˇ|淈泥
+涘|ㄙˋ|水涘 俟|ㄙˋ|俟機 騃|ㄞˊ|騃呆 欸|ㄞˇ|欸乃
+劬|ㄑㄩˊ|劬勞 雊|ㄍㄡˋ|雉雊 痀|ㄐㄩ|痀僂 姁|ㄒㄩˇ|姁姁
+槎|ㄔㄚˊ|木槎 瘥|ㄔㄞˋ|病瘥 嵯|ㄘㄨㄛˊ|嵯峨
+捋|ㄌㄩˇ|捋髭鬚 捋|ㄌㄜˋ|捋虎鬚 捋|ㄌㄨㄛ|揎拳捋袖 埒|ㄌㄜˋ|等埒 酹|ㄌㄟˋ|奠酹
+隅|ㄩˊ|陬隅 喁|ㄩˊ|喁喁 顒|ㄩㄥˊ|顒顒
+帩|ㄑㄧㄠˋ|帩頭 誚|ㄑㄧㄠˋ|誚讓 綃|ㄒㄧㄠ|生綃
+逶|ㄨㄟ|逶迤
+峻|ㄐㄩㄣˋ|嚴峻 浚|ㄐㄩㄣˋ|浚渫 悛|ㄑㄩㄢ|悔悛
+毖|ㄅㄧˋ|懲前毖後 毗|ㄆㄧˊ|毗鄰 貔|ㄆㄧˊ|貔貅
+鏑|ㄉㄧˊ|鳴鏑 嘀|ㄉㄧˊ|嘀咕 擿|ㄊㄧˋ|擿伏
+檄|ㄒㄧˊ|檄文 繳|ㄓㄨㄛˊ|弓繳
+孚|ㄈㄨˊ|深孚 桴|ㄈㄨˊ|鼓桴 莩|ㄆㄧㄠˇ|餓莩
+瞳|ㄊㄨㄥˊ|瞳孔 艟|ㄊㄨㄥˊ|艨艟 幢|ㄔㄨㄤˊ|幢幢
+咷|ㄊㄠˊ|號咷 洮|ㄊㄠˊ|洮米 佻|ㄊㄧㄠ|輕佻 晁|ㄔㄠˊ|晁氏
+竑|ㄏㄨㄥˊ|竑偉 紘|ㄏㄨㄥˊ|冠紘 閎|ㄏㄨㄥˊ|閎偉
+蹬|ㄉㄥˋ|蹬腿
+綸|ㄍㄨㄢ|羽扇綸巾 掄|ㄌㄨㄣ|掄拳 淪|ㄌㄨㄣˊ|淪陷
+罍|ㄌㄟˊ|尊罍 纍|ㄌㄟˊ|纍纍 壘|ㄌㄩˋ|神荼鬱壘
+掏|ㄊㄠ|掏腰包
+嫘|ㄌㄟˊ|嫘祖 縲|ㄌㄟˊ|縲紲
+舴|ㄗㄜˊ|舴艋 怍|ㄗㄨㄛˋ|慚怍 阼|ㄗㄨㄛˋ|阼階 酢|ㄗㄨㄛˋ|酬酢
+儋|ㄉㄢ|儋州 澹|ㄉㄢˋ|澹泊
+鈿|ㄉㄧㄢˋ|釵鈿 畦|ㄑㄧˊ|田畦
+洒|ㄒㄧˇ|洒濯 哂|ㄕㄣˇ|哂笑
+姮|ㄏㄥˊ|姮娥 揎|ㄒㄩㄢ|揎袖
+摶|ㄊㄨㄢˊ|摶扶搖`;
 
-                let rowItems = [];
-                let i = 0;
-                while (i < line.length) {
-                    if (line[i] === '（') {
-                        let endIdx = line.indexOf('）', i);
-                        if (endIdx !== -1) {
-                            let content = line.substring(i + 1, endIdx);
-                            let subParts = content.split('／');
-                            for (let part of subParts) {
-                                part = part.trim();
-                                if (part) {
-                                    rowItems.push(part);
-                                }
-                            }
-                            i = endIdx + 1;
-                            continue;
-                        }
-                    }
-                    
-                    let char = line[i];
-                    if (char !== '／' && char !== ' ' && char !== '（' && char !== '）') {
-                        rowItems.push(char);
-                    }
-                    i++;
-                }
+const $ = id => document.getElementById(id);
+const savedKey = 'zhuyin-practice-v3';
 
-                // Map rowItems to full objects
-                let mappedCluster = [];
-                for (let itemStr of rowItems) {
-                    let info = phoneticDict[itemStr];
-                    if (info) {
-                        mappedCluster.push({
-                            targetChar: info.char || (itemStr.length === 1 ? itemStr : itemStr[0]),
-                            phrase: info.phrase || itemStr,
-                            pinyin: info.pinyin,
-                            rawKey: itemStr
-                        });
-                    } else {
-                        // Fallback generator
-                        let char = itemStr[0];
-                        mappedCluster.push({
-                            targetChar: char,
-                            phrase: itemStr.length > 1 ? itemStr : char + "...",
-                            pinyin: "未知",
-                            rawKey: itemStr
-                        });
-                    }
-                }
+function parse(text) {
+  let clusters = [], unknown = [];
+  for (const line of text.split(/\r?\n/)) {
+    let source = line.trim();
+    if (!source || source === '字音') continue;
+    let row = [];
+    let tokens = source.includes('|')
+      ? source.split(/\s+/)
+      : source.match(/[^（）／\s]+(?:（[^）]+）)?/gu) || [];
 
-                if (mappedCluster.length > 0) {
-                    clusters.push(mappedCluster);
-                }
-            }
-            return clusters;
+    for (const token of tokens) {
+      if (token.includes('|')) {
+        let [char, reading, phrase] = token.split('|');
+        if (char && reading && phrase && phrase.includes(char) &&
+            /^[\u3105-\u3129˙ˊˇˋ]+$/.test(reading)) {
+          let known = base.flat().find(x =>
+            x.char === char && x.reading === reading && x.phrase === phrase
+          );
+          if (known) row.push(known);
+          else unknown.push(token);
+        } else {
+          unknown.push(token);
         }
+      } else {
+        let parts = token.match(/^([^（]+)(?:（(.+)）)?$/u);
+        if (!parts) continue;
+        let chars = [...parts[1]];
+        let contexts = parts[2]?.split('／') || [];
 
-        // Global State
-        let currentClusters = [];
-        let flashcardList = [];
-        let learnedList = [];
-        let fcIndex = 0;
-        let currentQuizData = null;
-
-        // Tab Switcher
-        function switchTab(tab) {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-
-            if (tab === 'flashcard') {
-                document.querySelectorAll('.nav-tab')[0].classList.add('active');
-                document.getElementById('flashcard-section').classList.add('active');
-            } else {
-                document.querySelectorAll('.nav-tab')[1].classList.add('active');
-                document.getElementById('quiz-section').classList.add('active');
-            }
+        for (let char of chars) {
+          let choices = base.flat().filter(x => x.char === char);
+          if (!choices.length) {
+            unknown.push(char);
+            continue;
+          }
+          let relevant = contexts.filter(p => p.includes(char));
+          let selected = relevant.length
+            ? choices.filter(x => relevant.some(p =>
+                x.phrase === p || x.phrase.includes(p)))
+            : choices.filter(x => choices.length === 1 || x.phrase === char);
+          if (!selected.length) {
+            unknown.push(token);
+            continue;
+          }
+          row.push(...selected);
         }
+      }
+    }
+    if (row.length) clusters.push(row);
+  }
+  return {clusters, unknown};
+}
 
-        // Initialize State
-        function initData(rawText) {
-            currentClusters = parseRawTextToClusters(rawText);
-            
-            // Build unique list for flashcards
-            flashcardList = [];
-            learnedList = [];
-            const seen = new Set();
+const base = DATA.split('\n').map(line =>
+  line.split(/\s+/).map(token => {
+    let [char, reading, phrase] = token.split('|');
+    return {char, reading, phrase};
+  })
+);
 
-            currentClusters.forEach(cluster => {
-                cluster.forEach(item => {
-                    const key = item.phrase + "_" + item.targetChar;
-                    if (!seen.has(key)) {
-                        seen.add(key);
-                        flashcardList.push(item);
-                    }
-                });
-            });
+let clusters = [], pending = [], done = [], index = 0;
+let selectedAnswer = null, quiz = null, quizN = 0, correctN = 0;
+let seenQuestions = new Set();
 
-            fcIndex = 0;
-            updateFlashcardUI();
-            generateQuiz();
-        }
+const key = x => [x.char, x.reading, x.phrase].join('|');
 
-        // FLASHCARD LOGIC
-        function updateFlashcardUI() {
-            document.getElementById('count-pending').innerText = `還沒會：${flashcardList.length}`;
-            document.getElementById('count-done').innerText = `已經會：${learnedList.length}`;
+function unique(items) {
+  let set = new Set();
+  return items.filter(x => {
+    let k = key(x);
+    if (set.has(k)) return false;
+    set.add(k);
+    return true;
+  });
+}
 
-            const card = document.getElementById('fc-card');
-            card.classList.remove('flipped');
+function save() {
+  try {
+    localStorage.setItem(savedKey, JSON.stringify({
+      clusters, pending, done, index, quizN, correctN
+    }));
+  } catch {
+    setStatus('此瀏覽器無法儲存進度；請定期匯出。');
+  }
+}
 
-            if (flashcardList.length === 0) {
-                document.getElementById('fc-word').innerText = "🎉 已全部學會";
-                document.getElementById('fc-pinyin').innerText = "太棒了！";
-                document.getElementById('fc-phrase').innerText = "您可以貼上新的文字進度繼續練習。";
-                return;
-            }
+function setStatus(s) {
+  $('status').textContent = s;
+}
 
-            if (fcIndex >= flashcardList.length) fcIndex = 0;
+function restore() {
+  try {
+    let s = JSON.parse(localStorage.getItem(savedKey));
+    if (s && Array.isArray(s.pending) &&
+        Array.isArray(s.clusters) && Array.isArray(s.done)) {
+      clusters = s.clusters;
+      pending = s.pending;
+      done = s.done;
+      index = s.index || 0;
+      quizN = s.quizN || 0;
+      correctN = s.correctN || 0;
+      return;
+    }
+  } catch {}
+  clusters = base;
+  pending = unique(base.flat());
+  done = [];
+}
 
-            const item = flashcardList[fcIndex];
-            document.getElementById('fc-word').innerText = item.phrase;
-            document.getElementById('fc-pinyin').innerText = item.pinyin;
-            document.getElementById('fc-phrase').innerText = `【${item.targetChar}】 ${item.phrase}`;
-        }
+function revealCard(x) {
+  $('card').classList.add('revealed');
+  $('card-word').textContent = x.reading;
+  $('card-hint').textContent =
+    `「${x.char}」・${x.phrase}${NOTES[key(x)] ? '；' + NOTES[key(x)] : ''}`;
+}
 
-        function flipFlashcard() {
-            document.getElementById('fc-card').classList.toggle('flipped');
-        }
+function card() {
+  selectedAnswer = null;
+  index = Math.min(index, Math.max(0, pending.length - 1));
+  $('pending').textContent = `待複習：${pending.length}`;
+  $('done').textContent = `已學會：${done.length}`;
+  let x = pending[index];
+  $('card').classList.remove('revealed');
+  $('card-word').textContent = x ? x.phrase : '🎉 全部學會';
+  $('card-hint').textContent = x
+    ? '點此顯示讀音'
+    : '可以重設題庫，或匯入下一批';
+  $('again').disabled = $('know').disabled = !x;
+  $('next-card').classList.add('hidden');
+  save();
+}
 
-        function answerFlashcard(isKnow) {
-            if (flashcardList.length === 0) return;
+$('card').onclick = () => {
+  let x = pending[index];
+  if (!x) return;
+  if (selectedAnswer !== null) {
+    revealCard(x);
+    return;
+  }
+  let isOpen = $('card').classList.toggle('revealed');
+  $('card-word').textContent = isOpen ? x.reading : x.phrase;
+  $('card-hint').textContent = isOpen
+    ? `「${x.char}」・${x.phrase}${NOTES[key(x)] ? '；' + NOTES[key(x)] : ''}`
+    : '點此顯示讀音';
+};
 
-            const current = flashcardList.splice(fcIndex, 1)[0];
-            if (isKnow) {
-                learnedList.push(current);
-            } else {
-                flashcardList.push(current); // push back to retry
-            }
-            updateFlashcardUI();
-        }
+function answer(known) {
+  let x = pending[index];
+  if (!x || selectedAnswer !== null) return;
+  selectedAnswer = known;
+  revealCard(x);
+  $('card-hint').textContent += known
+    ? '；已標記「已學會」'
+    : '；已標記「再練一次」';
+  $('again').disabled = $('know').disabled = true;
+  $('next-card').classList.remove('hidden');
+}
 
-        // Text Import/Export
-        function exportText() {
-            document.getElementById('io-textarea').value = defaultRawText;
-            navigator.clipboard.writeText(defaultRawText).then(() => {
-                alert("已複製完整範圍文字至剪貼簿！");
-            }).catch(() => {
-                alert("請直接選取框內文字進行複製。");
-            });
-        }
+$('again').onclick = () => answer(false);
+$('know').onclick = () => answer(true);
 
-        function importText() {
-            const val = document.getElementById('io-textarea').value.trim();
-            if (!val) {
-                alert("請先貼上文字！");
-                return;
-            }
-            initData(val);
-            alert("匯入成功！已更新 Flashcard 與練習題目。");
-        }
+$('next-card').onclick = () => {
+  if (selectedAnswer === null) return;
+  let x = pending.splice(index, 1)[0];
+  if (selectedAnswer) done.push(x);
+  else pending.push(x);
+  card();
+};
 
-        // QUIZ LOGIC
-        function generateQuiz() {
-            const validClusters = currentClusters.filter(c => c.length >= 2);
-            if (validClusters.length === 0) {
-                document.getElementById('quiz-question-display').innerText = "資料不足以出題";
-                return;
-            }
+function exportPending() {
+  let content = base.map(row =>
+    row.filter(x => pending.some(y => key(x) === key(y)))
+       .map(key).join(' ')
+  ).filter(Boolean).join('\n');
+  let extras = pending.filter(x =>
+    !base.flat().some(y => key(x) === key(y))
+  ).map(key);
 
-            // Pick a random cluster
-            const cluster = validClusters[Math.floor(Math.random() * validClusters.length)];
-            let idx1 = Math.floor(Math.random() * cluster.length);
-            let idx2 = Math.floor(Math.random() * cluster.length);
-            while (idx1 === idx2) {
-                idx2 = Math.floor(Math.random() * cluster.length);
-            }
+  $('input').value = [content, ...extras].filter(Boolean).join('\n');
+  $('input').focus();
+  $('input').select();
 
-            const item1 = cluster[idx1];
-            const item2 = cluster[idx2];
-            const isSame = (item1.pinyin === item2.pinyin);
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText($('input').value).then(
+      () => setStatus('已複製待複習項目。'),
+      () => setStatus('文字已選取，請手動複製。')
+    );
+  } else {
+    setStatus('文字已選取，請手動複製。');
+  }
+}
+$('export').onclick = exportPending;
 
-            currentQuizData = { item1, item2, isSame };
+$('import').onclick = () => {
+  let raw = $('input').value.trim();
+  if (!raw) {
+    setStatus('請先貼上資料。');
+    return;
+  }
+  let result = parse(raw);
+  if (!result.clusters.length) {
+    setStatus('沒有可辨識的已知字音；請用「字|注音|詞組」格式。');
+    return;
+  }
+  clusters = result.clusters;
+  pending = unique(clusters.flat());
+  done = [];
+  index = 0;
+  seenQuestions.clear();
+  quizN = correctN = 0;
+  card();
+  generate();
+  setStatus(result.unknown.length
+    ? `已載入 ${pending.length} 項；${result.unknown.length} 個未確認項目未加入題庫：${[...new Set(result.unknown)].slice(0,8).join('、')}${result.unknown.length > 8 ? '…' : ''}`
+    : `已載入 ${pending.length} 項。`);
+};
 
-            // Format as user requested: 題目：「腊」肉／「蜡」賓  or 題目：「字1」詞1／「字2」詞2
-            // Insert target character into full phrase if missing
-            function buildFormattedPhrase(item) {
-                if (item.phrase.includes(item.targetChar)) {
-                    return item.phrase.replace(item.targetChar, `「${item.targetChar}」`);
-                }
-                return `「${item.targetChar}」${item.phrase}`;
-            }
+$('reset').onclick = () => {
+  clusters = base;
+  pending = unique(base.flat());
+  done = [];
+  index = 0;
+  quizN = correctN = 0;
+  seenQuestions.clear();
+  card();
+  generate();
+  setStatus('已重設為完整題庫。');
+};
 
-            const text1 = buildFormattedPhrase(item1);
-            const text2 = buildFormattedPhrase(item2);
+const NOTES = {
+  '咯|ㄎㄚˇ|咯血': '《簡編本》ㄎㄚˇ；《重編本》另列 ㄌㄨㄛˋ。',
+  '驁|ㄠˊ|桀驁': '《簡編本》ㄠˊ；《重編本》詞條列 ㄠˋ（又音）。',
+  '畦|ㄑㄧˊ|田畦': '《簡編本》ㄑㄧˊ；《重編本》列語音 ㄑㄧˊ、讀音 ㄒㄧ。',
+  '瞿|ㄑㄩ|瞿先生': '《重編本》姓氏正讀 ㄑㄩ，另列 ㄑㄩˊ 為又音。'
+};
 
-            document.getElementById('quiz-question-display').innerHTML = `題目：${text1}／${text2}`;
-            document.getElementById('quiz-result-box').style.display = 'none';
-            document.getElementById('quiz-btn-row').style.display = 'flex';
-        }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c])
+  );
+}
 
-        function submitQuiz(userChoice) {
-            const isCorrect = (userChoice === currentQuizData.isSame);
-            const resultBox = document.getElementById('quiz-result-box');
-            const resultStatus = document.getElementById('quiz-result-status');
-            const resultDetail = document.getElementById('quiz-result-detail');
+function label(x) {
+  let at = x.phrase.indexOf(x.char);
+  return at < 0
+    ? `<span class="target">${escapeHtml(x.char)}</span> ${escapeHtml(x.phrase)}`
+    : escapeHtml(x.phrase.slice(0, at)) +
+      `<span class="target">${escapeHtml(x.char)}</span>` +
+      escapeHtml(x.phrase.slice(at + x.char.length));
+}
 
-            resultBox.style.display = 'block';
-            document.getElementById('quiz-btn-row').style.display = 'none';
+function allPairs() {
+  let pairs = [];
+  for (const row of clusters) {
+    let u = unique(row);
+    for (let i = 0; i < u.length; i++) {
+      for (let j = i + 1; j < u.length; j++) {
+        if (u[i].reading && u[j].reading) pairs.push([u[i], u[j]]);
+      }
+    }
+  }
+  return pairs;
+}
 
-            if (isCorrect) {
-                resultBox.className = "result-box correct";
-                resultStatus.innerHTML = "⭕ 答對了！";
-            } else {
-                resultBox.className = "result-box wrong";
-                resultStatus.innerHTML = "❌ 答錯了！";
-            }
+function generate() {
+  let pairs = allPairs();
+  $('feedback').classList.add('hidden');
+  $('next').classList.add('hidden');
+  $('quiz-count').textContent = `第 ${quizN + 1} 題`;
+  $('quiz-score').textContent = `答對 ${correctN} 題`;
 
-            const item1 = currentQuizData.item1;
-            const item2 = currentQuizData.item2;
+  if (!pairs.length) {
+    quiz = null;
+    $('question').textContent = '至少需要一組含兩個已知讀音的字詞';
+    $('choices').classList.add('hidden');
+    return;
+  }
 
-            resultDetail.innerHTML = `
-                <div>• <strong>「${item1.targetChar}」</strong>（${item1.phrase}）：讀音為 <span style="color:#ef4444; font-weight:bold;">${item1.pinyin}</span></div>
-                <div>• <strong>「${item2.targetChar}」</strong>（${item2.phrase}）：讀音為 <span style="color:#ef4444; font-weight:bold;">${item2.pinyin}</span></div>
-                <div style="margin-top: 8px; font-weight:700; color:#1e293b;">
-                    正確結果：兩字讀音 ${currentQuizData.isSame ? "【相同 ⭕】" : "【不同 ❌】"}
-                </div>
-            `;
-        }
+  let unused = pairs.filter(([a,b]) =>
+    !seenQuestions.has(key(a) + '/' + key(b))
+  );
+  if (!unused.length) {
+    seenQuestions.clear();
+    unused = pairs;
+  }
 
-        // Window Load
-        window.onload = function() {
-            initData(defaultRawText);
-        };
-    </script>
+  let [a,b] = unused[Math.floor(Math.random() * unused.length)];
+  seenQuestions.add(key(a) + '/' + key(b));
+  quiz = {a, b, same: a.reading === b.reading};
+  $('question').innerHTML = `${label(a)}<br>／<br>${label(b)}`;
+  $('choices').classList.remove('hidden');
+}
+
+function submit(choice) {
+  if (!quiz) return;
+  quizN++;
+  let good = choice === quiz.same;
+  if (good) correctN++;
+
+  let f = $('feedback');
+  f.className = 'answer' + (good ? '' : ' wrong');
+  f.innerHTML = `
+    <strong>${good ? '⭕ 答對了' : '❌ 答錯了'}</strong>
+    <p>「${escapeHtml(quiz.a.char)}」（${escapeHtml(quiz.a.phrase)}）：${escapeHtml(quiz.a.reading)}</p>
+    <p>「${escapeHtml(quiz.b.char)}」（${escapeHtml(quiz.b.phrase)}）：${escapeHtml(quiz.b.reading)}</p>
+    <p>正確答案：${quiz.same ? '相同' : '不同'}</p>
+    ${[quiz.a, quiz.b].map(x => NOTES[key(x)]
+      ? `<p>讀音註記：${escapeHtml(NOTES[key(x)])}</p>`
+      : '').join('')}
+  `;
+
+  $('choices').classList.add('hidden');
+  $('next').classList.remove('hidden');
+  $('quiz-score').textContent = `答對 ${correctN}／${quizN} 題`;
+  save();
+}
+
+$('same').onclick = () => submit(true);
+$('different').onclick = () => submit(false);
+$('next').onclick = generate;
+
+for (const [name, other] of [['card','quiz'], ['quiz','card']]) {
+  $('tab-' + name).onclick = () => {
+    $('panel-' + name).classList.remove('hidden');
+    $('panel-' + other).classList.add('hidden');
+    $('tab-' + name).setAttribute('aria-selected', 'true');
+    $('tab-' + other).setAttribute('aria-selected', 'false');
+  };
+}
+
+restore();
+card();
+generate();
+</script>
 </body>
 </html>
