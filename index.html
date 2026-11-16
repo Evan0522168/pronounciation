@@ -141,9 +141,15 @@ select{padding:9px;border:1px solid #c8d5e8;border-radius:8px;background:#fff}
       <label><input type="checkbox" value="other">其他</label>
     </div>
 
-    <p class="note" id="quiz-scope"></p>
-
     <div class="quiz-settings">
+      <label>
+        詞庫
+        <select id="quiz-source">
+          <option value="pending">僅待複習</option>
+          <option value="all">全部詞（含已學會）</option>
+        </select>
+      </label>
+
       <label>
         模式
         <select id="quiz-mode">
@@ -162,7 +168,8 @@ select{padding:9px;border:1px solid #c8d5e8;border-radius:8px;background:#fff}
       </label>
     </div>
 
-    <p class="note" id="mode-hint">作答後立即顯示解答。</p>
+    <p class="note" id="quiz-scope"></p>
+    <p class="note" id="mode-hint"></p>
 
     <div class="counts">
       <span id="quiz-count"></span>
@@ -379,6 +386,22 @@ const baseRows=DATA.split("\n").map(line=>
 const allItems=unique(baseRows.flat());
 const itemMap=new Map(allItems.map(x=>[key(x),x]));
 
+// 同一行視為同一組；重複詞可以同時屬於不同組。
+const rowMembership=new Map();
+baseRows.forEach((row,index)=>{
+  row.forEach(item=>{
+    const id=key(item);
+    if(!rowMembership.has(id))rowMembership.set(id,new Set());
+    rowMembership.get(id).add(index);
+  });
+});
+
+function shareRow(a,b){
+  const aRows=rowMembership.get(key(a));
+  const bRows=rowMembership.get(key(b));
+  return !!aRows&&!!bRows&&[...aRows].some(index=>bRows.has(index));
+}
+
 const NOTES={
   "咯|ㄎㄚˇ|咯血":"簡編本：ㄎㄚˇ；重編本另列 ㄌㄨㄛˋ。",
   "驁|ㄠˊ|桀驁":"簡編本：ㄠˊ；重編本詞條另列 ㄠˋ（又音）。",
@@ -391,6 +414,7 @@ let known=new Set();
 let cardGroup="A";
 let quizGroups=["A"];
 let quizMode="practice";
+let quizSource="pending";
 
 let currentCard=null;
 let cardAnswered=false;
@@ -402,6 +426,7 @@ let seenPairs=new Set();
 let exam=null;
 let undoState=null;
 let examAnswerLocked=false;
+let examUnlockTimer=null;
 
 function setStatus(text){
   $("status").textContent=text;
@@ -413,7 +438,8 @@ function snapshot(){
     known:[...known],
     cardGroup,
     quizGroups:[...quizGroups],
-    quizMode
+    quizMode,
+    quizSource
   };
 }
 
@@ -438,11 +464,15 @@ function applyState(state){
     }
   }
 
-  cardGroup=GROUP_NAMES[state.cardGroup]?state.cardGroup:"A";
+  cardGroup=Object.hasOwn(GROUP_NAMES,state.cardGroup)
+    ?state.cardGroup:"A";
+
   quizGroups=Array.isArray(state.quizGroups)
-    ?[...new Set(state.quizGroups.filter(g=>GROUP_NAMES[g]))]
+    ?[...new Set(state.quizGroups.filter(g=>Object.hasOwn(GROUP_NAMES,g)))]
     :["A"];
+
   quizMode=state.quizMode==="exam"?"exam":"practice";
+  quizSource=state.quizSource==="all"?"all":"pending";
 }
 
 function restore(){
@@ -496,6 +526,12 @@ function pendingItems(groups){
     .filter(x=>x&&matches(x,groups));
 }
 
+function quizItems(){
+  return quizSource==="all"
+    ?allItems.filter(x=>matches(x,quizGroups))
+    :pendingItems(quizGroups);
+}
+
 function syncControls(){
   document.querySelectorAll("[data-card-group]").forEach(b=>{
     b.setAttribute(
@@ -509,6 +545,7 @@ function syncControls(){
   });
 
   $("quiz-mode").value=quizMode;
+  $("quiz-source").value=quizSource;
 }
 
 function escapeHtml(s){
@@ -832,7 +869,7 @@ function pairId(a,b){
 }
 
 function pairPool(){
-  const items=pendingItems(quizGroups);
+  const items=quizItems();
   const pairs=[];
 
   for(let i=0;i<items.length;i++){
@@ -841,6 +878,7 @@ function pairPool(){
         a:items[i],
         b:items[j],
         same:items[i].reading===items[j].reading,
+        sameRow:shareRow(items[i],items[j]),
         id:pairId(items[i],items[j])
       });
     }
@@ -850,27 +888,49 @@ function pairPool(){
 }
 
 function pickPair(pairs){
-  const same=pairs.filter(x=>x.same);
-  const different=pairs.filter(x=>!x.same);
+  if(!pairs.length)return null;
 
+  // 優先選同組題；同組可用配對用完後才選跨組題。
+  const sameRowPairs=pairs.filter(x=>x.sameRow);
+  const preferred=sameRowPairs.length?sameRowPairs:pairs;
+
+  const same=preferred.filter(x=>x.same);
+  const different=preferred.filter(x=>!x.same);
+
+  // 在同組優先的前提下，盡量平衡相同／不同。
   const pool=same.length&&different.length
     ?(Math.random()<.5?same:different)
-    :pairs;
+    :preferred;
 
   const picked=pool[Math.floor(Math.random()*pool.length)];
-  return {...picked,answered:false};
+
+  // 隨機交換顯示順序。
+  return Math.random()<.5
+    ?{...picked,answered:false}
+    :{...picked,a:picked.b,b:picked.a,answered:false};
 }
 
 function updateQuizScope(){
-  const n=pendingItems(quizGroups).length;
+  const n=quizItems().length;
+  const sourceText=quizSource==="all"
+    ?"全部詞（含已學會）"
+    :"待複習詞";
 
   $("quiz-scope").textContent=
     `範圍：${quizGroups.length
       ?quizGroups.map(g=>GROUP_NAMES[g]).join("＋")
-      :"尚未選擇"}；${n} 項待複習。`
-    +"同一筆 A／B 共用字卡只計一次；已學會項目不出題。";
+      :"尚未選擇"}；${sourceText}共 ${n} 項。`
+    +"同一筆 A／B 共用字卡只計一次。"
+    +"優先從原始題庫同一行的詞配對；兩個詞都須符合所選類別與詞庫。";
 
   return n;
+}
+
+function insufficientMessage(){
+  if(!quizGroups.length)return "請先勾選類別。";
+  return quizSource==="all"
+    ?"所選類別至少需要兩項字詞。"
+    :"至少需要兩項待複習字詞；也可以將詞庫改為「全部詞」。";
 }
 
 function showQuestion(q){
@@ -879,8 +939,14 @@ function showQuestion(q){
 }
 
 function clearQuizUI(){
+  if(examUnlockTimer!==null){
+    clearTimeout(examUnlockTimer);
+    examUnlockTimer=null;
+  }
+  examAnswerLocked=false;
   quiz=null;
   exam=null;
+  $("same").disabled=$("different").disabled=false;
   $("feedback").classList.add("hidden");
   $("next").classList.add("hidden");
   $("choices").classList.add("hidden");
@@ -890,8 +956,6 @@ function clearQuizUI(){
 
 function resetQuiz(){
   clearQuizUI();
-  examAnswerLocked=false;
-  $("same").disabled=$("different").disabled=false;
   $("start-exam").textContent="開始考試";
   quizN=correctN=0;
   seenPairs.clear();
@@ -904,16 +968,14 @@ function resetQuiz(){
   $("start-exam").disabled=n<2;
 
   $("mode-hint").textContent=isExam
-    ?"作答後自動進入下一題，全部完成後一起看分數與解答。"
-    :"作答後立即顯示解答；同音與不同音題型盡量均衡。";
+    ?"優先出同組題，不重複配對；不足時以跨組題補足。作答後自動進入下一題，全部完成後一起看分數與解答。"
+    :"作答後立即顯示解答；優先出尚未練過的同組配對，再出跨組配對。同音與不同音題型盡量均衡。";
 
   if(isExam){
     $("quiz-count").textContent="考試尚未開始";
     $("quiz-score").textContent="";
     $("question").textContent=n<2
-      ?(quizGroups.length
-        ?"至少需要兩項待複習字詞。"
-        :"請先勾選類別。")
+      ?insufficientMessage()
       :"準備好後按「開始考試」。";
   }else{
     generatePractice();
@@ -926,17 +988,17 @@ function generatePractice(){
 
   const all=pairPool();
   updateQuizScope();
-  $("quiz-count").textContent=`第 ${quizN+1} 題`;
   $("quiz-score").textContent=`答對 ${correctN}／${quizN} 題`;
 
   if(!all.length){
     quiz=null;
-    $("question").textContent=quizGroups.length
-      ?"至少需要兩項待複習字詞。"
-      :"請先勾選類別。";
+    $("quiz-count").textContent="尚無可用題目";
+    $("question").textContent=insufficientMessage();
     $("choices").classList.add("hidden");
     return;
   }
+
+  $("quiz-count").textContent=`第 ${quizN+1} 題`;
 
   let pool=all.filter(x=>!seenPairs.has(x.id));
   if(!pool.length){
@@ -975,8 +1037,6 @@ function startExam(){
   }
 
   clearQuizUI();
-  examAnswerLocked=false;
-  $("same").disabled=$("different").disabled=false;
   exam={questions:selected,answers:[],index:0};
   $("start-exam").classList.add("hidden");
   $("quiz-score").textContent="作答中";
@@ -1026,7 +1086,8 @@ function submit(choice){
     examAnswerLocked=true;
     $("same").disabled=$("different").disabled=true;
 
-    setTimeout(()=>{
+    examUnlockTimer=setTimeout(()=>{
+      examUnlockTimer=null;
       examAnswerLocked=false;
       $("same").disabled=$("different").disabled=false;
     },250);
@@ -1064,6 +1125,12 @@ document.querySelectorAll(".filters input").forEach(c=>{
     save();
   };
 });
+
+$("quiz-source").onchange=()=>{
+  quizSource=$("quiz-source").value;
+  resetQuiz();
+  save();
+};
 
 $("quiz-mode").onchange=()=>{
   quizMode=$("quiz-mode").value;
