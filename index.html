@@ -1,685 +1,1093 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國文字音字形複習器</title>
-    <style>
-        :root {
-            --primary: #4a6fa5;
-            --secondary: #166088;
-            --success: #2ec4b6;
-            --danger: #e71d36;
-            --bg: #f8f9fa;
-            --card: #ffffff;
-        }
-
-        body {
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: var(--card);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        h1, h2, h3 { text-align: center; color: var(--secondary); }
-
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: #e9ecef;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .section { display: none; }
-        .section.active { display: block; }
-
-        .form-group {
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f1f3f5;
-            border-radius: 8px;
-        }
-
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            margin-bottom: 8px;
-        }
-
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .btn-success { background: var(--success); }
-        .btn-secondary { background: #6c757d; }
-
-        .btn:hover { opacity: 0.9; }
-
-        .sync-box {
-            background: #e7f5ff;
-            border: 1px solid #a5d8ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .option-btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            background: white;
-            text-align: left;
-            font-size: 18px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .option-btn.selected {
-            border-color: var(--primary);
-            background: #e7f5ff;
-        }
-
-        .result-box {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .result-box.correct { background: #d4edda; color: #155724; }
-        .result-box.wrong { background: #f8d7da; color: #721c24; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>國語字音｜A、B、其他分類練習</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#17253d;background:#f3f6fb}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px}
+.wrap{max-width:760px;margin:auto}
+h1{font-size:clamp(23px,5vw,30px);margin:8px 0}
+h2{font-size:18px;margin:0 0 12px}
+p{line-height:1.7}
+.sub,.note{color:#53647c;font-size:14px}
+.tabs,.actions,.categories,.filters{display:flex;gap:10px;flex-wrap:wrap}
+.tabs{margin:20px 0 15px}
+button,select,textarea{font:inherit}
+button{cursor:pointer;border:0;border-radius:10px;padding:11px 16px;font-weight:650}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+.tab,.secondary{background:#e5ecf5;color:#26384f}
+.tab[aria-selected=true],.category[aria-pressed=true]{background:#2563eb;color:#fff}
+.panel{background:#fff;border:1px solid #e1e8f1;border-radius:19px;padding:clamp(18px,5vw,30px);box-shadow:0 12px 30px #23314d0b}
+.hidden{display:none!important}
+.categories{margin-bottom:14px}
+.category{flex:1;background:#e5ecf5;color:#26384f;min-width:90px}
+.filters{margin:12px 0}
+.filters label{display:flex;align-items:center;gap:7px;padding:10px 14px;border:1px solid #c8d5e8;border-radius:10px;background:#f8fbff}
+.filters input{width:18px;height:18px}
+.counts{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#486079;font-size:14px}
+.card{display:block;width:100%;min-height:220px;background:#f8fbff;border:2px solid #dce8fa;margin:18px 0;text-align:center;color:#17253d;overflow-wrap:anywhere}
+.word{display:block;font-size:clamp(30px,7vw,46px);font-weight:750;line-height:1.5}
+.hint{display:block;color:#60728a;font-size:14px;margin-top:12px;line-height:1.7}
+.card.revealed{background:#eaf3ff}
+.card.revealed .word{color:#1558c1}
+.actions button{flex:1;min-width:120px}
+.red{background:#e54848;color:#fff}
+.green{background:#07976d;color:#fff}
+.dark{background:#26384f;color:#fff}
+.wide{width:100%;margin-top:14px}
+.tools{margin-top:24px;padding-top:20px;border-top:1px solid #e2e8f0}
+textarea{width:100%;min-height:145px;border:1px solid #bdc9d9;border-radius:10px;padding:12px;font:14px/1.6 ui-monospace,monospace;resize:vertical}
+.tools label{display:block;font-weight:650;margin-bottom:8px}
+.status{font-size:14px;color:#175dc9;min-height:1.5em;line-height:1.7}
+.question{text-align:center;background:#f8fbff;border:2px solid #dce8fa;border-radius:14px;padding:25px 16px;font-size:clamp(22px,5vw,28px);font-weight:700;line-height:1.8;margin:18px 0;overflow-wrap:anywhere}
+.target{color:#175dc9;text-decoration:underline;text-underline-offset:5px}
+.answer{border-radius:12px;padding:17px;background:#ecfdf5;line-height:1.8;margin-top:20px}
+.answer.wrong{background:#fff0f0}
+.answer p{margin:6px 0}
+.quiz-settings{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:16px 0}
+.quiz-settings label{display:flex;gap:7px;align-items:center}
+select{padding:9px;border:1px solid #c8d5e8;border-radius:8px;background:#fff}
+.footer{margin-top:18px;color:#60728a;font-size:13px;line-height:1.7}
+.footer a{color:#1558c1}
+.exam-item{border-top:1px solid #c8d5e8;padding:16px 0}
+.exam-item:first-child{border:0}
+.exam-item p{margin:6px 0}
+.result-wrong{color:#b42318}
+.result-right{color:#067647}
+</style>
 </head>
 <body>
+<main class="wrap">
+  <h1>國語字音自主練習</h1>
+  <p class="sub">
+    閃卡一次背一類；練習與考試可以複選類別。
+    選擇「已學會」或「再練一次」後，先看答案再進入下一張。
+  </p>
 
-<div class="container">
-    <h1>國文字音字形複習器</h1>
+  <div class="tabs" role="tablist" aria-label="練習模式">
+    <button id="tab-card" class="tab" role="tab"
+      aria-selected="true" aria-controls="panel-card">閃卡</button>
+    <button id="tab-quiz" class="tab" role="tab"
+      aria-selected="false" aria-controls="panel-quiz">練習／考試</button>
+  </div>
 
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('input-section')">功能一：輸入新詞</button>
-        <button class="tab-btn" onclick="switchTab('quiz-setup')">功能二：開始測驗</button>
-        <button class="tab-btn" onclick="switchTab('sync-section')">跨裝置同步</button>
+  <section class="panel" id="panel-card"
+    role="tabpanel" aria-labelledby="tab-card">
+    <h2>選擇要背的類別</h2>
+
+    <div class="categories" role="group" aria-label="閃卡類別（單選）">
+      <button class="category" data-card-group="A"
+        aria-pressed="true">A 類</button>
+      <button class="category" data-card-group="B"
+        aria-pressed="false">B 類</button>
+      <button class="category" data-card-group="other"
+        aria-pressed="false">其他</button>
     </div>
 
-    <!-- 功能一：新增資料 -->
-    <div id="input-section" class="section active">
-        <h2>建立與擴充題庫</h2>
-        
-        <div class="form-group">
-            <h3>新增【字音類】</h3>
-            <label>測驗字（1字）</label>
-            <input type="text" id="phonetic-char" maxlength="1" placeholder="例如：施">
-            <label>讀音</label>
-            <input type="text" id="phonetic-pron" placeholder="例如：ㄕ">
-            <label>包含該字的詞語</label>
-            <input type="text" id="phonetic-word" placeholder="例如：椸施（施及）">
-            <label>字音類別代號（1字）</label>
-            <input type="text" id="phonetic-cat" maxlength="1" placeholder="例如：A">
-            <button class="btn" onclick="addPhonetic()">儲存字音資料</button>
-        </div>
-
-        <div class="form-group">
-            <h3>新增【字形類】（兩筆為一組）</h3>
-            <h4>[第 1 組]</h4>
-            <input type="text" id="shape-char1" maxlength="1" placeholder="測驗字 1 (例：辨)">
-            <input type="text" id="shape-pron1" placeholder="讀音 1 (例：ㄅㄧㄢˋ)">
-            <input type="text" id="shape-word1" placeholder="詞語 1 (例：分辨)">
-            
-            <h4>[第 2 組]</h4>
-            <input type="text" id="shape-char2" maxlength="1" placeholder="測驗字 2 (例：辯)">
-            <input type="text" id="shape-pron2" placeholder="讀音 2 (例：ㄅㄧㄢˋ)">
-            <input type="text" id="shape-word2" placeholder="詞語 2 (例：辯論)">
-            
-            <button class="btn" onclick="addShapePair()">儲存字形對照組</button>
-        </div>
-
-        <div>
-            <h3>目前題庫統計</h3>
-            <p>字音資料：<span id="count-phonetic">0</span> 筆 | 字形對照：<span id="count-shape">0</span> 組</p>
-        </div>
+    <div class="counts">
+      <span id="pending"></span>
+      <span id="done"></span>
     </div>
 
-    <!-- 跨裝置同步區塊 -->
-    <div id="sync-section" class="section">
-        <h2>跨裝置資料同步</h2>
-        <div class="sync-box">
-            <h3>匯出 / 匯入 備份檔</h3>
-            <p>可將包含答對紀錄與最新詞語的題庫下載為 JSON 檔案，傳至其他裝置讀取。</p>
-            <button class="btn btn-success" onclick="exportData()">匯出題庫備份檔 (.json)</button>
-            <br><br>
-            <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
-            <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">匯入題庫備份檔 (.json)</button>
-        </div>
+    <button class="card" id="card" aria-label="點擊顯示或隱藏讀音">
+      <span class="word" id="card-word"></span>
+      <span class="hint" id="card-hint"></span>
+    </button>
+
+    <div class="actions">
+      <button class="red" id="again">再練一次</button>
+      <button class="green" id="know">已學會</button>
+    </div>
+    <button id="next-card" class="dark wide hidden">下一張</button>
+
+    <div class="tools">
+      <label for="input">複製／貼上待複習範圍</label>
+      <textarea id="input"
+        placeholder="可貼上上次匯出的進度，或字|注音|詞組，例如：愀|ㄑㄧㄠˇ|愀然"></textarea>
+
+      <p class="note">
+        「複製本類」只匯出目前類別尚未學會的項目；
+        貼回載入後，省略的項目會視為已學會。
+        單一類別的匯入只更新該類；
+        A、B 共用的同一筆字卡共享進度。
+      </p>
+
+      <div class="actions">
+        <button class="secondary" id="export">複製本類待複習</button>
+        <button class="secondary" id="export-all">複製全部待複習</button>
+        <button class="secondary" id="import">貼上後載入</button>
+      </div>
+
+      <div class="actions" style="margin-top:10px">
+        <button class="secondary" id="reset">重設本類</button>
+        <button class="secondary" id="undo" disabled>復原上次匯入／重設</button>
+      </div>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="panel-quiz"
+    role="tabpanel" aria-labelledby="tab-quiz">
+    <h2>選擇出題範圍（可複選）</h2>
+
+    <div class="filters" role="group" aria-label="測驗類別">
+      <label><input type="checkbox" value="A" checked>A 類</label>
+      <label><input type="checkbox" value="B">B 類</label>
+      <label><input type="checkbox" value="other">其他</label>
     </div>
 
-    <!-- 功能二：測驗設定與測驗區 -->
-    <div id="quiz-setup" class="section">
-        <div id="setup-panel">
-            <h2>測驗設定</h2>
-            <div class="form-group">
-                <label>選擇類別：</label>
-                <select id="quiz-cat-select">
-                    <option value="all">全部（字音+字形）</option>
-                    <option value="phonetic">僅字音類</option>
-                    <option value="shape">僅字形類</option>
-                </select>
+    <p class="note" id="quiz-scope"></p>
 
-                <label>選擇題型：</label>
-                <select id="quiz-type-select">
-                    <option value="random">隨機混合題型</option>
-                    <option value="1">1. 字音單選</option>
-                    <option value="2">2. 字音多選</option>
-                    <option value="3">3. 字形單選</option>
-                    <option value="4">4. 改錯題</option>
-                    <option value="5">5. 字音填空</option>
-                    <option value="6">6. 字形填空</option>
-                </select>
+    <div class="quiz-settings">
+      <label>
+        模式
+        <select id="quiz-mode">
+          <option value="practice">即時練習</option>
+          <option value="exam">考試</option>
+        </select>
+      </label>
 
-                <label>題目數量：</label>
-                <select id="quiz-amount-select">
-                    <option value="10">10 題</option>
-                    <option value="20">20 題</option>
-                    <option value="999">不中斷（直到手動停止）</option>
-                </select>
-
-                <button class="btn" onclick="startQuiz()">開始測驗</button>
-            </div>
-        </div>
-
-        <div id="quiz-panel" style="display:none;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 id="quiz-progress">題目 1</h3>
-            </div>
-            <hr>
-            <div id="question-box"></div>
-            <button id="submit-btn" class="btn" style="margin-top:20px;" onclick="submitAnswer()">提交答案</button>
-            
-            <div id="result-box" class="result-box">
-                <div id="result-text"></div>
-                <button class="btn btn-secondary" style="margin-top:10px;" onclick="nextQuestion()">下一題</button>
-            </div>
-        </div>
+      <label id="exam-length-label" class="hidden">
+        題數
+        <select id="exam-length">
+          <option value="10">10 題</option>
+          <option value="20">20 題</option>
+          <option value="30">30 題</option>
+        </select>
+      </label>
     </div>
-</div>
+
+    <p class="note" id="mode-hint">作答後立即顯示解答。</p>
+
+    <div class="counts">
+      <span id="quiz-count"></span>
+      <span id="quiz-score"></span>
+    </div>
+
+    <button id="start-exam" class="dark wide hidden">開始考試</button>
+    <div class="question" id="question"></div>
+
+    <div class="actions hidden" id="choices">
+      <button class="green" id="same">⭕ 相同</button>
+      <button class="red" id="different">❌ 不同</button>
+    </div>
+
+    <div id="feedback" class="answer hidden" aria-live="polite"></div>
+    <button id="next" class="dark wide hidden">下一題</button>
+    <div id="exam-results" class="hidden" aria-live="polite"></div>
+  </section>
+
+  <p class="footer">
+    進度會保留在此瀏覽器，換裝置前請複製匯出。
+    類別依前次選文字詞清單整理，字卡例詞可能是延伸詞；
+    不同讀音的詞組分開背。
+    其他類沿用現有題庫，尚未做本次逐篇出處核驗。
+    <br>
+    <a href="https://dict.concised.moe.edu.tw/"
+      target="_blank" rel="noopener">教育部國語辭典簡編本</a>
+    ·
+    <a href="https://dict.revised.moe.edu.tw/"
+      target="_blank" rel="noopener">重編國語辭典修訂本</a>
+  </p>
+</main>
 
 <script>
-// 預設寫入的字音總表 (104筆)
-const defaultPhoneticList = [
-    { id: "p_1", char: "施", pron: "ㄕ", word: "椸施（施及）", cat: "A" },
-    { id: "p_2", char: "麃", pron: "ㄅㄧㄠ", word: "麃轆簏", cat: "B" },
-    { id: "p_3", char: "湫", pron: "ㄑㄧㄡ", word: "甃湫愀", cat: "C" },
-    { id: "p_4", char: "葭", pron: "ㄐㄧㄚ", word: "嘏葭", cat: "D" },
-    { id: "p_5", char: "芻", pron: "ㄔㄨ", word: "縐芻謅", cat: "E" },
-    { id: "p_6", char: "甑", pron: "ㄗㄥˋ", word: "罾矰甑", cat: "F" },
-    { id: "p_7", char: "亢", pron: "ㄎㄤˋ", word: "亢頏", cat: "G" },
-    { id: "p_8", char: "蹴", pron: " brownies", word: "僦憱蹴", cat: "H" },
-    { id: "p_9", char: "抔", pron: "ㄆㄡˊ", word: "邳抔", cat: "I" },
-    { id: "p_10", char: "睥", pron: "ㄅㄧˋ", word: "睥睨", cat: "J" },
-    { id: "p_11", char: "菲", pron: "ㄈㄟ", word: "菲衣薄食", cat: "K" },
-    { id: "p_12", char: "詘", pron: "ㄑㄩ", word: "詰詘", cat: "L" },
-    { id: "p_13", char: "剄", pron: "ㄐㄧㄥˇ", word: "剄痙", cat: "M" },
-    { id: "p_14", char: "磽", pron: "ㄑㄧㄠ", word: "磽蹺", cat: "N" },
-    { id: "p_15", char: "播", pron: "ㄅㄛ", word: "轓墦播", cat: "O" },
-    { id: "p_16", char: "佁", pron: "ㄧˇ", word: "佁然", cat: "P" },
-    { id: "p_17", char: "窬", pron: "ㄩˊ", word: "穿窬", cat: "Q" },
-    { id: "p_18", char: "遁", pron: "ㄉㄨㄣˋ", word: "遁楯", cat: "R" },
-    { id: "p_19", char: "哆", pron: "ㄔˇ", word: "披哆（黟）", cat: "S" },
-    { id: "p_20", char: "扃", pron: "ㄐㄧㄥ", word: "扃牖", cat: "T" },
-    { id: "p_21", char: "訾", pron: "ㄗˇ", word: "齜髭訾（訾議/財訾）眥", cat: "U" },
-    { id: "p_22", char: "閹", pron: "ㄧㄢ", word: "閹然/崦嵫", cat: "V" },
-    { id: "p_23", char: "皰", pron: "ㄆㄠˋ", word: "雹匏皰枹", cat: "W" },
-    { id: "p_24", char: "塿", pron: "ㄌㄡˇ", word: "培塿/簍鏤窶", cat: "X" },
-    { id: "p_25", char: "咯", "pron": "ㄎㄚˇ", word: "咯血", cat: "Y" },
-    { id: "p_26", char: "翎", pron: "ㄌㄧㄥˊ", word: "蛉翎", cat: "Z" },
-    { id: "p_27", char: "憮", pron: "ㄨˇ", word: "嫵廡憮然", cat: "A" },
-    { id: "p_28", char: "慳", pron: "ㄑㄧㄢ", word: "慳吝", cat: "B" },
-    { id: "p_29", char: "韙", pron: "ㄨㄟˇ", word: "韋幃韙煒暐韞", cat: "C" },
-    { id: "p_30", char: "刳", pron: "ㄎㄨ", word: "刳姱洿", cat: "D" },
-    { id: "p_31", char: "繆", pron: "ㄇㄡˊ", word: "綢繆/山川相繆/繆小姐", cat: "E" },
-    { id: "p_32", char: "倬", pron: "ㄓㄨㄛ", word: "倬踔", cat: "F" },
-    { id: "p_33", char: "菹", pron: "ㄗㄨ", word: "俎疽趄苴齟咀菹醢", cat: "G" },
-    { id: "p_34", char: "掊", pron: "ㄆㄡˇ", word: "醅踣培掊/一掊土/掊斗折衡", cat: "H" },
-    { id: "p_35", char: "蹩", pron: "ㄅㄧㄝˊ", word: "蹩腳", cat: "I" },
-    { id: "p_36", char: "餂", pron: "ㄊㄧㄢˇ", word: "餂", cat: "J" },
-    { id: "p_37", char: "諳", pron: "ㄢ", word: "歆諳闇", cat: "K" },
-    { id: "p_38", char: "浼", pron: "ㄇㄟˇ", word: "俛浼", cat: "L" },
-    { id: "p_39", char: "戧", pron: "ㄑㄧㄤˋ", word: "戧愴傖", cat: "M" },
-    { id: "p_40", char: "楮", pron: " eyeball", word: "赭渚翥楮", cat: "N" },
-    { id: "p_41", char: "衾", pron: "ㄑㄧㄣ", word: "妗衾", cat: "O" },
-    { id: "p_42", char: "鼴", pron: "ㄧㄢˇ", word: "鼴鼠", cat: "P" },
-    { id: "p_43", char: "踖", pron: "ㄐㄧˊ", word: "腊踖蜡", cat: "Q" },
-    { id: "p_44", char: "憒", pron: "ㄍㄨㄟˋ", word: "昏憒", cat: "R" },
-    { id: "p_45", char: "懧", pron: "ㄋㄨㄛˋ", word: "懧懦", cat: "S" },
-    { id: "p_46", char: "瞿", pron: "ㄑㄩˊ", word: "衢癯瞿（瞿先生/瞿然）攫", cat: "T" },
-    { id: "p_47", char: "帑", pron: "ㄊㄤˇ", word: "帑呶孥", cat: "U" },
-    { id: "p_48", char: "饘", pron: "ㄓㄢ", word: "邅饘蟺", cat: "V" },
-    { id: "p_49", char: "驁", pron: "ㄠˊ", word: "驁聱", cat: "W" },
-    { id: "p_50", char: "庋", pron: "ㄐㄧˇ", word: "庋跂忮", cat: "X" },
-    { id: "p_51", char: "齬", pron: "ㄩˇ", word: "梧寤圄齬", cat: "Y" },
-    { id: "p_52", char: "鎬", pron: "ㄏㄠˋ", word: "縞嚆皜鎬", cat: "Z" },
-    { id: "p_53", char: "庾", pron: "ㄩˇ", word: "廋庾", cat: "A" },
-    { id: "p_54", char: "蹇", pron: "ㄐㄧㄢˇ", word: "蹇謇騫搴褰", cat: "B" },
-    { id: "p_55", char: "瞋", pron: "ㄔㄣ", word: "闐瑱瞋嗔", cat: "C" },
-    { id: "p_56", char: "諏", pron: "ㄗㄡ", word: "鯫諏陬", cat: "D" },
-    { id: "p_57", char: "黥", pron: "ㄑㄧㄥˊ", word: "黥黔", cat: "E" },
-    { id: "p_58", char: "啗", pron: "ㄉㄢˋ", word: "啗萏閻", cat: "F" },
-    { id: "p_59", char: "儔", pron: "ㄔㄡˊ", word: "儔擣鑄", cat: "G" },
-    { id: "p_60", char: "髡", pron: "ㄎㄨㄣ", word: "鬑髡", cat: "H" },
-    { id: "p_61", char: "琚", pron: "ㄐㄩ", word: "裾据琚踞倨", cat: "I" },
-    { id: "p_62", char: "觭", pron: "ㄐㄧ", word: "觭掎踦", cat: "J" },
-    { id: "p_63", char: "噱", pron: "ㄐㄩㄝˊ", word: "遽噱（發噱）璩", cat: "K" },
-    { id: "p_64", char: "遄", pron: "ㄔㄨㄢˊ", word: "顓遄", cat: "L" },
-    { id: "p_65", char: "愒", pron: "ㄎㄞˋ", word: "曷愒", cat: "M" },
-    { id: "p_66", char: "欬", pron: "ㄎㄞˋ", word: "垓欬（謦欬）頦", cat: "N" },
-    { id: "p_67", char: "倡", pron: "ㄔㄤˋ", word: "倡（倡優）娼", cat: "O" },
-    { id: "p_68", char: "怫", pron: "ㄈㄨˊ", word: "拂怫", cat: "P" },
-    { id: "p_69", char: "胛", pron: "ㄐㄧㄚˇ", word: "胛匣", cat: "Q" },
-    { id: "p_70", char: "湄", pron: "ㄇㄟˊ", word: "湄水", cat: "R" },
-    { id: "p_71", char: "齎", pron: "ㄐㄧ", word: "齎虀薺", cat: "S" },
-    { id: "p_72", char: "槊", pron: "ㄕㄨㄛˋ", word: "橫槊賦詩", cat: "T" },
-    { id: "p_73", char: "晡", pron: "ㄅㄨ", word: "晡逋餔脯", cat: "U" },
-    { id: "p_74", char: "慊", pron: "ㄑㄧㄢˋ", word: "蒹縑慊（慊慊/不慊於心）", cat: "V" },
-    { id: "p_75", char: "坻", pron: "ㄔˊ", word: "羝坻詆", cat: "W" },
-    { id: "p_76", char: "燹", pron: "ㄒㄧㄢˇ", word: "豳遯圂燹豕", cat: "X" },
-    { id: "p_77", char: "醨", pron: "ㄌㄧˊ", word: "酹醨", cat: "Y" },
-    { id: "p_78", char: "淈", pron: "ㄍㄨˇ", word: "倔（倔強）淈", cat: "Z" },
-    { id: "p_79", char: "俟", pron: "ㄙˋ", word: "涘俟騃欸", cat: "A" },
-    { id: "p_80", char: "劬", pron: "ㄑㄩˊ", word: "劬雊痀姁", cat: "B" },
-    { id: "p_81", char: "嵯", pron: " choose", word: "槎瘥嵯", cat: "C" },
-    { id: "p_82", char: "捋", pron: "ㄌㄨㄛ", word: "捋（捋髭鬚/捋虎鬚/揎拳捋袖）埒酹", cat: "D" },
-    { id: "p_83", char: "喁", pron: "ㄩˊ", word: "隅喁顒", cat: "E" },
-    { id: "p_84", char: "誚", pron: "ㄑㄧㄠˋ", word: "帩誚綃", cat: "F" },
-    { id: "p_85", char: "逶", pron: "ㄨㄟ", word: "逶迤", cat: "G" },
-    { id: "p_86", char: "悛", pron: "ㄑㄨㄢ", word: "峻浚悛", cat: "H" },
-    { id: "p_87", char: "毗", pron: "ㄆㄧ", word: "毖毗貔", cat: "I" },
-    { id: "p_88", char: "擿", pron: "ㄓ", word: "鏑嘀擿", cat: "J" },
-    { id: "p_89", char: "繳", pron: "ㄓㄨㄛˊ", word: "檄繳（弓繳）", cat: "K" },
-    { id: "p_90", char: "莩", pron: "ㄆㄧㄠˇ", word: "孚桴莩", cat: "L" },
-    { id: "p_91", char: "幢", pron: "ㄔㄨㄤˊ", word: "瞳艟幢", cat: "M" },
-    { id: "p_92", char: "洮", pron: "ㄊㄠˊ", word: "咷洮佻晁", cat: "N" },
-    { id: "p_93", char: "閎", pron: "ㄏㄨㄥˊ", word: "竑紘閎", cat: "O" },
-    { id: "p_94", char: "蹬", pron: "ㄉㄥ", word: "蹬腿", cat: "P" },
-    { id: "p_95", char: "掄", pron: "ㄌㄨㄣ", word: "綸掄淪", cat: "Q" },
-    { id: "p_96", char: "壘", pron: "ㄌㄟˇ", word: "罍纍壘（神荼鬱壘）", cat: "R" },
-    { id: "p_97", char: "掏", pron: "ㄊㄠ", word: "掏腰包", cat: "S" },
-    { id: "p_98", char: "縲", pron: "ㄌㄟˊ", word: "嫘縲", cat: "T" },
-    { id: "p_99", char: "酢", pron: "ㄗㄨㄛˋ", word: "舴怍阼酢", cat: "U" },
-    { id: "p_100", char: "澹", pron: "ㄉㄢˋ", word: "儋澹", cat: "V" },
-    { id: "p_101", char: "畦", pron: "ㄑㄧˊ", word: "鈿畦", cat: "W" },
-    { id: "p_102", char: "哂", pron: "ㄕㄣˇ", word: "洒哂", cat: "X" },
-    { id: "p_103", char: "揎", pron: "ㄒㄨㄢ", word: "姮揎", cat: "Y" },
-    { id: "p_104", char: "摶", pron: "ㄊㄨㄢˊ", word: "摶風", cat: "Z" }
-].map(item => ({ ...item, streak: 0, wrongCount: 0 }));
+const DATA=`椸|ㄧˊ|椸架 施|ㄧˋ|施及 施|ㄕ|施行
+麃|ㄅㄧㄠ|麃麃 轆|ㄌㄨˋ|轆轤 簏|ㄌㄨˋ|竹簏
+甃|ㄓㄡˋ|井甃 湫|ㄐㄧㄠˇ|湫隘 愀|ㄑㄧㄠˇ|愀然
+嘏|ㄍㄨˇ|祝嘏 葭|ㄐㄧㄚ|蒹葭
+縐|ㄓㄡˋ|縐紗 芻|ㄔㄨˊ|芻議 謅|ㄗㄡ|胡謅
+罾|ㄗㄥ|魚罾 矰|ㄗㄥ|矰繳 甑|ㄗㄥˋ|甑塵釜魚
+亢|ㄎㄤˋ|高亢 頏|ㄏㄤˊ|頡頏
+僦|ㄐㄧㄡˋ|僦屋 憱|ㄘㄨˋ|憱爾 蹴|ㄘㄨˋ|蹴踏
+邳|ㄆㄟˊ|邳州 抔|ㄆㄡˊ|一抔土
+睥|ㄅㄧˋ|睥睨
+菲|ㄈㄟˇ|菲衣薄食 緋|ㄈㄟ|緋紅 腓|ㄈㄟˊ|腓腸肌 菲|ㄈㄟˇ|妄自菲薄 菲|ㄈㄟ|菲律賓
+詘|ㄑㄩ|詰詘
+剄|ㄐㄧㄥˇ|自剄 痙|ㄐㄧㄥˋ|痙攣
+磽|ㄑㄧㄠ|磽瘠 蹺|ㄑㄧㄠ|蹺蹺板
+轓|ㄈㄢ|朱轓 墦|ㄈㄢˊ|墦間 播|ㄅㄛˋ|播種
+佁|ㄞˇ|佁然
+窬|ㄩˊ|穿窬
+遁|ㄉㄨㄣˋ|遁逃 楯|ㄕㄨㄣˇ|欄楯
+哆|ㄔㄜˇ|披哆 黟|ㄧ|黟縣
+扃|ㄐㄩㄥ|扃門
+齜|ㄗ|齜牙 髭|ㄗ|髭鬚 訾|ㄗˇ|訾議 訾|ㄗ|財訾 眥|ㄗˋ|眼眥
+閹|ㄧㄢ|閹然 崦|ㄧㄢ|崦嵁 閹|ㄧㄢ|逆閹
+雹|ㄅㄠˊ|冰雹 匏|ㄆㄠˊ|匏瓜 皰|ㄆㄠˋ|面皰 枹|ㄈㄨˊ|鼓枹
+塿|ㄌㄡˇ|培塿 簍|ㄌㄡˇ|竹簍 鏤|ㄌㄡˋ|鏤刻 窶|ㄐㄩˋ|貧窶
+咯|ㄎㄚˇ|咯血
+蛉|ㄌㄧㄥˊ|螟蛉 翎|ㄌㄧㄥˊ|羽翎
+嫵|ㄨˇ|嫵媚 廡|ㄨˇ|廊廡 憮|ㄨˇ|憮然
+慳|ㄑㄧㄢ|慳吝
+韋|ㄨㄟˊ|韋編 幃|ㄨㄟˊ|帷幃 韙|ㄨㄟˇ|大不韙 煒|ㄨㄟˇ|煒燁 暐|ㄨㄟˇ|暐暐 韞|ㄩㄣˋ|韞櫝
+刳|ㄎㄨ|刳木 姱|ㄎㄨㄚ|姱容 洿|ㄨ|洿池
+寥|ㄌㄧㄠˊ|寂寥 僇|ㄌㄨˋ|僇人 瘳|ㄔㄡ|痊瘳 醪|ㄌㄠˊ|濁醪 繆|ㄌㄧㄠˊ|山川相繆 繆|ㄇㄧㄠˋ|繆小姐 繆|ㄇㄡˊ|綢繆 蓼|ㄌㄨˋ|蓼莪 蓼|ㄌㄧㄠˇ|紅蓼
+倬|ㄓㄨㄛˊ|倬立 踔|ㄓㄨㄛˊ|踔厲
+俎|ㄗㄨˇ|俎豆 疽|ㄐㄩ|癰疽 趄|ㄐㄩ|趑趄 苴|ㄐㄩˇ|履苴 齟|ㄐㄩˇ|齟齬 咀|ㄐㄩˇ|咀嚼 菹|ㄐㄩ|菹醢
+醅|ㄆㄟ|濁醅 踣|ㄅㄛˊ|踣地 培|ㄆㄟˊ|培育 掊|ㄆㄡˊ|掊坑 掊|ㄆㄡˇ|掊斗折衡
+蹩|ㄅㄧㄝˊ|蹩腳
+餂|ㄊㄧㄢˇ|餂誘
+歆|ㄒㄧㄣ|歆羨 諳|ㄢ|諳熟 闇|ㄢ|闇練
+俛|ㄈㄨˇ|俛首 浼|ㄇㄟˇ|浼托
+戧|ㄑㄧㄤˋ|戧金 愴|ㄔㄨㄤˋ|悲愴 傖|ㄘㄤ|傖俗
+赭|ㄓㄜˇ|赭石 渚|ㄓㄨˇ|江渚 翥|ㄓㄨˋ|翱翥 楮|ㄔㄨˇ|楮幣
+妗|ㄐㄧㄣˋ|舅妗 衾|ㄑㄧㄣ|衾枕
+鼴|ㄧㄢˇ|鼴鼠
+腊|ㄒㄧˊ|腊肉 踖|ㄐㄧˊ|踖踖 蜡|ㄓㄚˋ|蜡賓
+憒|ㄎㄨㄟˋ|昏憒
+懧|ㄋㄨㄛˋ|懧愚
+衢|ㄑㄩˊ|通衢 癯|ㄑㄩˊ|清癯 瞿|ㄑㄩ|瞿先生 瞿|ㄐㄩˋ|瞿然 攫|ㄐㄩㄝˊ|攫取
+帑|ㄊㄤˇ|帑藏 呶|ㄋㄠˊ|呶呶 孥|ㄋㄨˊ|妻孥
+邅|ㄓㄢ|邅回 饘|ㄓㄢ|饘粥 蟺|ㄕㄢˋ|蜿蟺
+驁|ㄠˊ|桀驁 聱|ㄠˊ|聱牙
+庋|ㄐㄧˇ|庋藏 跂|ㄑㄧˋ|跂望 忮|ㄓˋ|忮求
+梧|ㄨˊ|梧桐 寤|ㄨˋ|寤寐 圄|ㄩˇ|囹圄 齬|ㄩˇ|齟齬
+縞|ㄍㄠˇ|縞素 嚆|ㄏㄠ|嚆矢 皜|ㄏㄠˋ|皜皜 鎬|ㄏㄠˋ|鎬京
+廋|ㄙㄡ|廋詞 庾|ㄩˇ|倉庾
+蹇|ㄐㄧㄢˇ|蹇滯 謇|ㄐㄧㄢˇ|謇謇 騫|ㄑㄧㄢ|騫騰 搴|ㄑㄧㄢ|搴旗 褰|ㄑㄧㄢ|褰裳
+闐|ㄊㄧㄢˊ|闐寂 瑱|ㄊㄧㄢˋ|玉瑱 瞋|ㄔㄣ|瞋目 嗔|ㄔㄣ|嗔怪
+鯫|ㄗㄡ|鯫生 諏|ㄗㄡ|諮諏 陬|ㄗㄡ|陬隅
+黥|ㄑㄧㄥˊ|黥刑 黔|ㄑㄧㄢˊ|黔首
+啗|ㄉㄢˋ|啗食 萏|ㄉㄢˋ|菡萏 閻|ㄧㄢˊ|閻羅
+儔|ㄔㄡˊ|儔類 擣|ㄉㄠˇ|擣衣 鑄|ㄓㄨˋ|鑄造
+鬑|ㄌㄧㄢˊ|鬑鬑 髡|ㄎㄨㄣ|髡刑
+裾|ㄐㄩ|裙裾 据|ㄐㄩ|拮据 琚|ㄐㄩ|佩琚 踞|ㄐㄩˋ|盤踞 倨|ㄐㄩˋ|倨傲
+觭|ㄐㄧ|觭輪 掎|ㄐㄧˇ|掎角之勢 踦|ㄧˇ|膝之所踦
+遽|ㄐㄩˋ|急遽 噱|ㄐㄩㄝˊ|發噱 璩|ㄑㄩˊ|玉璩
+顓|ㄓㄨㄢ|顓頊 遄|ㄔㄨㄢˊ|遄往
+曷|ㄏㄜˊ|曷勝 愒|ㄎㄞˋ|玩歲愒日
+垓|ㄍㄞ|垓下 欬|ㄎㄞˋ|謦欬 頦|ㄏㄞˊ|頷頦 倡|ㄔㄤˋ|禍倡於匪徒
+倡|ㄔㄤ|倡優 娼|ㄔㄤ|娼妓
+拂|ㄈㄨˊ|拂袖 怫|ㄈㄟˋ|怫然
+胛|ㄐㄧㄚˇ|肩胛 匣|ㄒㄧㄚˊ|木匣
+湄|ㄇㄟˊ|水湄
+齎|ㄐㄧ|齎志 虀|ㄐㄧ|斷虀畫粥 薺|ㄐㄧˋ|薺菜
+槊|ㄕㄨㄛˋ|橫槊
+晡|ㄅㄨ|晡時 逋|ㄅㄨ|逋逃 餔|ㄅㄨ|餔啜 脯|ㄈㄨˇ|肉脯
+蒹|ㄐㄧㄢ|蒹葭 縑|ㄐㄧㄢ|縑帛 慊|ㄑㄧㄢˋ|慊慊 慊|ㄑㄧㄝˋ|不慊於心
+羝|ㄉㄧ|羝羊 坻|ㄔˊ|渚坻 詆|ㄉㄧˇ|詆毀
+豳|ㄅㄧㄣ|豳風 遯|ㄉㄨㄣˋ|遯世 圂|ㄏㄨㄣˋ|豬圂 燹|ㄒㄧㄢˇ|兵燹 豕|ㄕˇ|豕突
+酹|ㄌㄟˋ|奠酹 醨|ㄌㄧˊ|薄醨
+倔|ㄐㄩㄝˊ|倔強 淈|ㄍㄨˇ|淈泥
+涘|ㄙˋ|水涘 俟|ㄙˋ|俟機 騃|ㄞˊ|騃呆 欸|ㄞˇ|欸乃
+劬|ㄑㄩˊ|劬勞 雊|ㄍㄡˋ|雉雊 痀|ㄐㄩ|痀僂 姁|ㄒㄩˇ|姁姁
+槎|ㄔㄚˊ|木槎 瘥|ㄔㄞˋ|病瘥 嵯|ㄘㄨㄛˊ|嵯峨
+捋|ㄌㄩˇ|捋髭鬚 捋|ㄌㄜˋ|捋虎鬚 捋|ㄌㄨㄛ|揎拳捋袖 埒|ㄌㄜˋ|等埒 酹|ㄌㄟˋ|奠酹
+隅|ㄩˊ|陬隅 喁|ㄩˊ|喁喁 顒|ㄩㄥˊ|顒顒
+帩|ㄑㄧㄠˋ|帩頭 誚|ㄑㄧㄠˋ|誚讓 綃|ㄒㄧㄠ|生綃
+逶|ㄨㄟ|逶迤
+峻|ㄐㄩㄣˋ|嚴峻 浚|ㄐㄩㄣˋ|浚渫 悛|ㄑㄩㄢ|悔悛
+毖|ㄅㄧˋ|懲前毖後 毗|ㄆㄧˊ|毗鄰 貔|ㄆㄧˊ|貔貅
+鏑|ㄉㄧˊ|鳴鏑 嘀|ㄉㄧˊ|嘀咕 擿|ㄊㄧˋ|擿伏
+檄|ㄒㄧˊ|檄文 繳|ㄓㄨㄛˊ|弓繳
+孚|ㄈㄨˊ|深孚 桴|ㄈㄨˊ|鼓桴 莩|ㄆㄧㄠˇ|餓莩 繳|ㄐㄧㄠˇ|代繳
+瞳|ㄊㄨㄥˊ|瞳孔 艟|ㄊㄨㄥˊ|艨艟 幢|ㄔㄨㄤˊ|幢幢
+咷|ㄊㄠˊ|號咷 洮|ㄊㄠˊ|洮米 佻|ㄊㄧㄠ|輕佻 晁|ㄔㄠˊ|晁氏
+竑|ㄏㄨㄥˊ|竑偉 紘|ㄏㄨㄥˊ|冠紘 閎|ㄏㄨㄥˊ|閎偉
+蹬|ㄉㄥˋ|蹬腿
+綸|ㄍㄨㄢ|羽扇綸巾 掄|ㄌㄨㄣ|掄拳 淪|ㄌㄨㄣˊ|淪陷
+罍|ㄌㄟˊ|尊罍 纍|ㄌㄟˊ|纍纍 壘|ㄌㄩˋ|神荼鬱壘
+掏|ㄊㄠ|掏腰包
+嫘|ㄌㄟˊ|嫘祖 縲|ㄌㄟˊ|縲紲
+舴|ㄗㄜˊ|舴艋 怍|ㄗㄨㄛˋ|慚怍 阼|ㄗㄨㄛˋ|阼階 酢|ㄗㄨㄛˋ|酬酢
+儋|ㄉㄢ|儋州 澹|ㄉㄢˋ|澹泊
+鈿|ㄉㄧㄢˋ|釵鈿 畦|ㄑㄧˊ|田畦
+洒|ㄒㄧˇ|洒濯 哂|ㄕㄣˇ|哂笑
+姮|ㄏㄥˊ|姮娥 揎|ㄒㄩㄢ|揎袖
+摶|ㄊㄨㄢˊ|摶扶搖`;
 
-// 初始化本地資料庫
-let db = {
-    phonetic: JSON.parse(localStorage.getItem('db_phonetic')) || defaultPhoneticList,
-    shapePairs: JSON.parse(localStorage.getItem('db_shape')) || []
+const GROUP_KEYS={
+  A:["施","甃","愀","葭","菲","播","楯","扃","眥","匏","煒","寥","繆",
+     "山川相繆","俎","踣","諳","俛","渚","衢","縞","蹇","瞋","鯫",
+     "諏","黔","啗","閻","踞","踦","遽","遄","倡","拂","湄","齎",
+     "槊","餔","蒹","坻","醨","淈","涘","隅","峻","繳","桴","艟"],
+  B:["施","睥","菲","詘","痙","蹺","髭","眥","閹","廡","赭","憒","懧",
+     "癯","瞿","瞿然","攫","驁","鑄","鬑","踞","倨","齎","俟","捋",
+     "捋髭鬚","隅","帩","峻","檄","瞳","幢","掏","摶"]
 };
 
-function saveData() {
-    localStorage.setItem('db_phonetic', JSON.stringify(db.phonetic));
-    localStorage.setItem('db_shape', JSON.stringify(db.shapePairs));
-    updateSummary();
+const EXPLICIT_GROUPS={
+  "施及":["other"],
+  "菲衣薄食":["other"],
+  "披哆":["other"],
+  "訾議":["other"],
+  "財訾":["other"],
+  "閹然":["other"],
+  "培塿":["other"],
+  "咯血":["other"],
+  "憮然":["other"],
+  "山川相繆":["A"],
+  "繆小姐":["other"],
+  "綢繆":["other"],
+  "蓼莪":["other"],
+  "紅蓼":["other"],
+  "菹醢":["other"],
+  "一掊土":["other"],
+  "掊斗折衡":["other"],
+  "瞿先生":["other"],
+  "瞿然":["B"],
+  "發噱":["other"],
+  "謦欬":["other"],
+  "倡優":["other"],
+  "慊慊":["other"],
+  "不慊於心":["other"],
+  "倔強":["other"],
+  "捋髭鬚":["B"],
+  "捋虎鬚":["other"],
+  "揎拳捋袖":["other"],
+  "弓繳":["other"],
+  "神荼鬱壘":["other"]
+};
+
+const $=id=>document.getElementById(id);
+const GROUP_NAMES={A:"A 類",B:"B 類",other:"其他"};
+const STORAGE_KEY="zhuyin-practice-v4";
+const key=x=>[x.char,x.reading,x.phrase].join("|");
+const unique=items=>[...new Map(items.map(x=>[key(x),x])).values()];
+
+function groupsFor(x){
+  const exact={
+    "施行":["A","B"],
+    "妄自菲薄":["A"],
+    "菲律賓":["B"],
+    "逆閹":["B"],
+    "膝之所踦":["A"],
+    "禍倡於匪徒":["A"],
+    "代繳":["A"]
+  };
+  if(exact[x.phrase])return exact[x.phrase];
+  if(EXPLICIT_GROUPS[x.phrase])return EXPLICIT_GROUPS[x.phrase];
+  const found=["A","B"].filter(g=>GROUP_KEYS[g].includes(x.char));
+  return found.length?found:["other"];
 }
 
-function updateSummary() {
-    document.getElementById('count-phonetic').innerText = db.phonetic.length;
-    document.getElementById('count-shape').innerText = db.shapePairs.length;
-}
-updateSummary();
+const baseRows=DATA.split("\n").map(line=>
+  line.trim().split(/\s+/).filter(Boolean).map(token=>{
+    const [char,reading,phrase]=token.split("|");
+    const item={char,reading,phrase};
+    item.groups=groupsFor(item);
+    return item;
+  })
+);
 
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    
-    event.target.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+const allItems=unique(baseRows.flat());
+const itemMap=new Map(allItems.map(x=>[key(x),x]));
+
+const NOTES={
+  "咯|ㄎㄚˇ|咯血":"簡編本：ㄎㄚˇ；重編本另列 ㄌㄨㄛˋ。",
+  "驁|ㄠˊ|桀驁":"簡編本：ㄠˊ；重編本詞條另列 ㄠˋ（又音）。",
+  "畦|ㄑㄧˊ|田畦":"簡編本：ㄑㄧˊ；重編本另分語音、讀音。",
+  "瞿|ㄑㄩ|瞿先生":"重編本姓氏正讀 ㄑㄩ，另列 ㄑㄩˊ 為又音。"
+};
+
+let pending=allItems.map(key);
+let known=new Set();
+let cardGroup="A";
+let quizGroups=["A"];
+let quizMode="practice";
+
+let currentCard=null;
+let cardAnswered=false;
+let cardRevealed=false;
+let quiz=null;
+let quizN=0;
+let correctN=0;
+let seenPairs=new Set();
+let exam=null;
+let undoState=null;
+let examAnswerLocked=false;
+
+function setStatus(text){
+  $("status").textContent=text;
 }
 
-function exportData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `chinese_quiz_backup_${new Date().toISOString().slice(0,10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+function snapshot(){
+  return {
+    pending:[...pending],
+    known:[...known],
+    cardGroup,
+    quizGroups:[...quizGroups],
+    quizMode
+  };
 }
 
-function importData(event) {
-    const fileReader = new FileReader();
-    fileReader.onload = function(e) {
-        try {
-            const importedDb = JSON.parse(e.target.result);
-            if (importedDb.phonetic && importedDb.shapePairs) {
-                db = importedDb;
-                saveData();
-                alert('備份檔案匯入成功！資料已更新。');
-            } else {
-                alert('檔案格式不相符！');
-            }
-        } catch(err) {
-            alert('無法解析此檔案！');
+function save(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot()));
+  }catch{
+    setStatus("無法自動儲存；請複製待複習範圍保存。");
+  }
+}
+
+function applyState(state){
+  const p=Array.isArray(state.pending)?state.pending:[];
+  const k=Array.isArray(state.known)?state.known:[];
+
+  pending=[...new Set(p.filter(id=>itemMap.has(id)))];
+  known=new Set(k.filter(id=>itemMap.has(id)&&!pending.includes(id)));
+
+  for(const x of allItems){
+    if(!pending.includes(key(x))&&!known.has(key(x))){
+      pending.push(key(x));
+    }
+  }
+
+  cardGroup=GROUP_NAMES[state.cardGroup]?state.cardGroup:"A";
+  quizGroups=Array.isArray(state.quizGroups)
+    ?[...new Set(state.quizGroups.filter(g=>GROUP_NAMES[g]))]
+    :["A"];
+  quizMode=state.quizMode==="exam"?"exam":"practice";
+}
+
+function restore(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(saved&&Array.isArray(saved.pending)&&Array.isArray(saved.known)){
+      applyState(saved);
+      return;
+    }
+
+    const legacy=JSON.parse(localStorage.getItem("zhuyin-practice-v3"));
+    if(legacy&&Array.isArray(legacy.pending)&&Array.isArray(legacy.done)){
+      const included=new Set(
+        (Array.isArray(legacy.clusters)?legacy.clusters.flat():[])
+          .filter(x=>x&&x.char).map(key)
+      );
+
+      const oldKeys=new Set(
+        DATA.split("\n")
+          .flatMap(line=>line.trim().split(/\s+/))
+          .filter(Boolean)
+      );
+
+      const p=legacy.pending.filter(x=>x&&x.char).map(key);
+      const k=legacy.done.filter(x=>x&&x.char).map(key);
+      const added=[
+        "施行","妄自菲薄","菲律賓","逆閹",
+        "膝之所踦","禍倡於匪徒","代繳"
+      ];
+
+      if(included.size){
+        for(const id of oldKeys){
+          if(!included.has(id)&&!p.includes(id)&&!k.includes(id)){
+            const item=itemMap.get(id);
+            if(item&&!added.includes(item.phrase))k.push(id);
+          }
         }
-    };
-    fileReader.readAsText(event.target.files[0]);
-}
+      }
 
-function addPhonetic() {
-    const char = document.getElementById('phonetic-char').value.trim();
-    const pron = document.getElementById('phonetic-pron').value.trim();
-    const word = document.getElementById('phonetic-word').value.trim();
-    const cat = document.getElementById('phonetic-cat').value.trim();
-
-    if(!char || !pron || !word || !cat) return alert('請完整填寫字音資料！');
-
-    db.phonetic.push({ id: 'p_' + Date.now(), char, pron, word, cat, streak: 0, wrongCount: 0 });
-    saveData();
-    alert('字音資料新增成功！');
-    ['phonetic-char','phonetic-pron','phonetic-word','phonetic-cat'].forEach(id => document.getElementById(id).value = '');
-}
-
-function addShapePair() {
-    const c1 = document.getElementById('shape-char1').value.trim();
-    const p1 = document.getElementById('shape-pron1').value.trim();
-    const w1 = document.getElementById('shape-word1').value.trim();
-    const c2 = document.getElementById('shape-char2').value.trim();
-    const p2 = document.getElementById('shape-pron2').value.trim();
-    const w2 = document.getElementById('shape-word2').value.trim();
-
-    if(!c1 || !p1 || !w1 || !c2 || !p2 || !w2) return alert('請完整填寫字形對照組！');
-
-    db.shapePairs.push({
-        id: 's_' + Date.now(),
-        item1: { char: c1, pron: p1, word: w1 },
-        item2: { char: c2, pron: p2, word: w2 },
-        streak: 0, wrongCount: 0
-    });
-
-    saveData();
-    alert('字形對照組新增成功！');
-    ['shape-char1','shape-pron1','shape-word1','shape-char2','shape-pron2','shape-word2'].forEach(id => document.getElementById(id).value = '');
-}
-
-let currentQuiz = { total: 0, currentIdx: 0, cat: 'all', typeSetting: 'random', currentQ: null, selectedOptions: [] };
-
-function startQuiz() {
-    if (db.phonetic.length < 2 && db.shapePairs.length < 2) return alert('題庫資料不足！');
-
-    currentQuiz.cat = document.getElementById('quiz-cat-select').value;
-    currentQuiz.typeSetting = document.getElementById('quiz-type-select').value;
-    currentQuiz.total = parseInt(document.getElementById('quiz-amount-select').value);
-    currentQuiz.currentIdx = 0;
-
-    document.getElementById('setup-panel').style.display = 'none';
-    document.getElementById('quiz-panel').style.display = 'block';
-
-    generateNextQuestion();
-}
-
-function getWeightedRandomItem(list) {
-    let validList = list.filter(item => item.streak < 5);
-    if (validList.length === 0) validList = list;
-
-    let pool = [];
-    validList.forEach(item => {
-        let weight = 1 + ((item.wrongCount || 0) * 2);
-        for(let i=0; i<weight; i++) pool.push(item);
-    });
-
-    return pool[Math.floor(Math.random() * pool.length)];
-}
-
-function generateNextQuestion() {
-    if(currentQuiz.currentIdx >= currentQuiz.total) {
-        alert('測驗完成！');
-        location.reload();
-        return;
+      applyState({pending:p,known:k});
     }
-
-    currentQuiz.currentIdx++;
-    currentQuiz.selectedOptions = [];
-    document.getElementById('result-box').style.display = 'none';
-    document.getElementById('submit-btn').style.display = 'block';
-    document.getElementById('quiz-progress').innerText = `題目 ${currentQuiz.currentIdx} / ${currentQuiz.total === 999 ? '不中斷' : currentQuiz.total}`;
-
-    let type = currentQuiz.typeSetting;
-    if(type === 'random') {
-        let availableTypes = [];
-        if(currentQuiz.cat === 'phonetic' || currentQuiz.cat === 'all') availableTypes.push(1,2,5);
-        if(currentQuiz.cat === 'shape' || currentQuiz.cat === 'all') availableTypes.push(3,6);
-        if(currentQuiz.cat === 'all' && db.shapePairs.length > 0) availableTypes.push(4);
-        type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
-    } else {
-        type = parseInt(type);
-    }
-
-    buildQuestionView(type);
+  }catch{}
 }
 
-function buildQuestionView(type) {
-    const qBox = document.getElementById('question-box');
-    qBox.innerHTML = '';
-    currentQuiz.currentQ = { type: type, answer: null, targetItem: null };
+function matches(x,groups){
+  return x.groups.some(g=>groups.includes(g));
+}
 
-    if(type === 1) {
-        qBox.innerHTML = '<h4>【字音單選】請選出讀音/字音類別相同的組合：</h4>';
-        let item = getWeightedRandomItem(db.phonetic);
-        currentQuiz.currentQ.targetItem = item;
-        
-        let sameCatItems = db.phonetic.filter(x => x.cat === item.cat && x.id !== item.id);
-        let diffCatItems = db.phonetic.filter(x => x.cat !== item.cat);
+function pendingItems(groups){
+  return pending.map(id=>itemMap.get(id))
+    .filter(x=>x&&matches(x,groups));
+}
 
-        let correctOpt = `${item.word} / ${sameCatItems.length > 0 ? sameCatItems[0].word : item.word}`;
-        let options = [{ text: correctOpt, correct: true }];
+function syncControls(){
+  document.querySelectorAll("[data-card-group]").forEach(b=>{
+    b.setAttribute(
+      "aria-pressed",
+      String(b.dataset.cardGroup===cardGroup)
+    );
+  });
 
-        for(let i=0; i<3; i++) {
-            let rndDiff = diffCatItems[Math.floor(Math.random()*diffCatItems.length)] || item;
-            options.push({ text: `${item.word} / ${rndDiff.word}`, correct: false });
+  document.querySelectorAll(".filters input").forEach(c=>{
+    c.checked=quizGroups.includes(c.value);
+  });
+
+  $("quiz-mode").value=quizMode;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[c]));
+}
+
+function label(x){
+  const i=x.phrase.indexOf(x.char);
+  if(i<0)return escapeHtml(x.phrase);
+
+  return escapeHtml(x.phrase.slice(0,i))
+    +`<span class="target">${escapeHtml(x.char)}</span>`
+    +escapeHtml(x.phrase.slice(i+x.char.length));
+}
+
+function cardHint(x){
+  return `「${x.char}」・${x.phrase}・`
+    +x.groups.map(g=>GROUP_NAMES[g]).join("／")
+    +(NOTES[key(x)]?"；"+NOTES[key(x)]:"");
+}
+
+function updateCounts(){
+  const count=pendingItems([cardGroup]).length;
+  const done=allItems.filter(x=>
+    matches(x,[cardGroup])&&known.has(key(x))
+  ).length;
+
+  $("pending").textContent=`${GROUP_NAMES[cardGroup]}待複習：${count}`;
+  $("done").textContent=`已學會：${done}`;
+}
+
+function renderCard(){
+  currentCard=pendingItems([cardGroup])[0]||null;
+  cardAnswered=false;
+  cardRevealed=false;
+  updateCounts();
+
+  $("card").classList.remove("revealed");
+  $("card-word").innerHTML=currentCard
+    ?label(currentCard)
+    :"🎉 本類已全部學會";
+
+  $("card-hint").textContent=currentCard
+    ?"點擊查看讀音，或先選擇熟悉程度"
+    :"可以選其他類，或重設本類。";
+
+  $("again").disabled=$("know").disabled=!currentCard;
+  $("next-card").classList.add("hidden");
+}
+
+function revealCard(){
+  if(!currentCard)return;
+  cardRevealed=true;
+  $("card").classList.add("revealed");
+  $("card-word").textContent=currentCard.reading;
+  $("card-hint").textContent=cardHint(currentCard);
+}
+
+function answerCard(isKnown){
+  if(!currentCard||cardAnswered)return;
+
+  cardAnswered=true;
+  const id=key(currentCard);
+  pending=pending.filter(k=>k!==id);
+
+  if(isKnown)known.add(id);
+  else pending.push(id);
+
+  revealCard();
+  $("card-hint").textContent+=isKnown
+    ?"；已標記「已學會」"
+    :"；已排到本類後面再練";
+
+  $("again").disabled=$("know").disabled=true;
+  $("next-card").classList.remove("hidden");
+  updateCounts();
+  save();
+}
+
+$("card").onclick=()=>{
+  if(!currentCard)return;
+  if(cardAnswered||!cardRevealed){
+    revealCard();
+  }else{
+    cardRevealed=false;
+    $("card").classList.remove("revealed");
+    $("card-word").innerHTML=label(currentCard);
+    $("card-hint").textContent="點擊查看讀音";
+  }
+};
+
+$("again").onclick=()=>answerCard(false);
+$("know").onclick=()=>answerCard(true);
+$("next-card").onclick=renderCard;
+
+document.querySelectorAll("[data-card-group]").forEach(b=>{
+  b.onclick=()=>{
+    cardGroup=b.dataset.cardGroup;
+    syncControls();
+    renderCard();
+    save();
+  };
+});
+
+function serializePending(scope){
+  const groups=scope==="ALL"?Object.keys(GROUP_NAMES):[scope];
+  const keep=new Set(pendingItems(groups).map(key));
+  const seen=new Set();
+
+  const lines=baseRows.map(row=>
+    row.filter(x=>{
+      const id=key(x);
+      if(!keep.has(id)||seen.has(id))return false;
+      seen.add(id);
+      return true;
+    }).map(key).join(" ")
+  ).filter(Boolean);
+
+  return [
+    "# 字音進度 v4",
+    `# scope=${scope}`,
+    "# 僅列尚未學會的項目；空清單代表本範圍已學會。",
+    ...lines
+  ].join("\n");
+}
+
+async function copyPending(scope){
+  $("input").value=serializePending(scope);
+  $("input").focus();
+  $("input").select();
+
+  try{
+    if(!navigator.clipboard||!window.isSecureContext)throw new Error();
+    await navigator.clipboard.writeText($("input").value);
+    setStatus(
+      `已複製${scope==="ALL"?"全部類別":GROUP_NAMES[scope]}的待複習範圍。`
+    );
+  }catch{
+    setStatus("文字已放入並選取；請手動複製。");
+  }
+}
+
+$("export").onclick=()=>copyPending(cardGroup);
+$("export-all").onclick=()=>copyPending("ALL");
+
+function parseInput(text){
+  const items=[];
+  const unknown=[];
+  let scope=null;
+  let hasData=false;
+
+  for(let line of text.replace(/｜/g,"|").split(/\r?\n/)){
+    line=line.trim();
+    if(!line||line==="字音")continue;
+
+    if(line.startsWith("#")){
+      const m=line.match(/^#\s*scope=(\S+)\s*$/);
+      if(m){
+        if(scope&&scope!==m[1]){
+          return {error:"進度標頭的範圍互相矛盾。"};
         }
-        options.sort(() => Math.random() - 0.5);
+        scope=m[1];
+      }
+      continue;
+    }
 
-        currentQuiz.currentQ.answer = options.findIndex(o => o.correct);
-        renderOptions(options, false);
+    hasData=true;
 
-    } else if(type === 2) {
-        qBox.innerHTML = '<h4>【字音多選】請選出讀音/字音類別相同的組合（複選）：</h4>';
-        let item = getWeightedRandomItem(db.phonetic);
-        currentQuiz.currentQ.targetItem = item;
+    if(line.includes("|")){
+      for(const token of line.split(/\s+/)){
+        const x=itemMap.get(token);
+        if(x)items.push(x);
+        else unknown.push(token);
+      }
+    }else{
+      const tokens=line.match(
+        /[^（）()／/\s]+(?:[（(][^）)]+[）)])?/gu
+      )||[];
 
-        let sameCatItems = db.phonetic.filter(x => x.cat === item.cat);
-        let diffCatItems = db.phonetic.filter(x => x.cat !== item.cat);
-
-        let options = [];
-        let correctIndices = [];
-
-        for(let i=0; i<5; i++) {
-            let isCorrect = Math.random() > 0.5;
-            if (isCorrect && sameCatItems.length >= 2) {
-                let p1 = sameCatItems[Math.floor(Math.random()*sameCatItems.length)];
-                let p2 = sameCatItems[Math.floor(Math.random()*sameCatItems.length)];
-                options.push({ text: `${p1.word} / ${p2.word}`, correct: true });
-                correctIndices.push(i);
-            } else {
-                let p1 = db.phonetic[Math.floor(Math.random()*db.phonetic.length)];
-                let p2 = diffCatItems[Math.floor(Math.random()*diffCatItems.length)] || p1;
-                options.push({ text: `${p1.word} / ${p2.word}`, correct: false });
-            }
+      for(const token of tokens){
+        const match=token.match(/^([^（(]+)(?:[（(](.+)[）)])?$/u);
+        if(!match){
+          unknown.push(token);
+          continue;
         }
-        currentQuiz.currentQ.answer = correctIndices;
-        renderOptions(options, true);
 
-    } else if(type === 3) {
-        qBox.innerHTML = '<h4>【字形單選】請選出字形運用完全正確的詞語：</h4>';
-        let pair = getWeightedRandomItem(db.shapePairs);
-        currentQuiz.currentQ.targetItem = pair;
+        const contexts=match[2]
+          ?match[2].split(/[／/]/).map(s=>s.trim())
+          :[];
 
-        let options = [
-            { text: pair.item1.word, correct: true },
-            { text: pair.item1.word.replace(pair.item1.char, pair.item2.char), correct: false },
-            { text: pair.item2.word.replace(pair.item2.char, pair.item1.char), correct: false },
-            { text: pair.item2.word + "(錯)", correct: false }
-        ];
-        options.sort(() => Math.random() - 0.5);
+        for(const char of [...match[1]]){
+          const options=allItems.filter(x=>x.char===char);
+          const relevant=contexts.filter(p=>p.includes(char));
+          const chosen=relevant.length
+            ?options.filter(x=>relevant.includes(x.phrase))
+            :options;
 
-        currentQuiz.currentQ.answer = options.findIndex(o => o.correct);
-        renderOptions(options, false);
-
-    } else if(type === 4) {
-        qBox.innerHTML = '<h4>【改錯題】請選出「沒有錯別字」的正確選項：</h4>';
-        let pair = getWeightedRandomItem(db.shapePairs);
-        currentQuiz.currentQ.targetItem = pair;
-
-        let options = [
-            { text: pair.item1.word, correct: true },
-            { text: pair.item1.word.replace(pair.item1.char, 'X'), correct: false },
-            { text: pair.item2.word.replace(pair.item2.char, 'Y'), correct: false },
-            { text: pair.item1.word + "錯", correct: false }
-        ];
-        options.sort(() => Math.random() - 0.5);
-
-        currentQuiz.currentQ.answer = options.findIndex(o => o.correct);
-        renderOptions(options, false);
-
-    } else if(type === 5) {
-        let item = getWeightedRandomItem(db.phonetic);
-        currentQuiz.currentQ.targetItem = item;
-        currentQuiz.currentQ.answer = item.pron;
-
-        qBox.innerHTML = `
-            <h4>【字音填空】</h4>
-            <p style="font-size: 20px;">請輸入詞語 「<strong>${item.word}</strong>」 中 『<strong>${item.char}</strong>』 的讀音：</p>
-            <input type="text" id="fill-answer" style="font-size:18px; padding:8px;" placeholder="請輸入讀音">
-        `;
-
-    } else if(type === 6) {
-        let pair = getWeightedRandomItem(db.shapePairs);
-        let item = Math.random() > 0.5 ? pair.item1 : pair.item2;
-        currentQuiz.currentQ.targetItem = pair;
-        currentQuiz.currentQ.answer = item.char;
-
-        let promptWord = item.word.replace(item.char, "（＿）");
-        qBox.innerHTML = `
-            <h4>【字形填空】</h4>
-            <p style="font-size: 20px;">請填入空格中的正確字形：<strong>${promptWord}</strong> （讀音：${item.pron}）</p>
-            <input type="text" id="fill-answer" maxlength="1" style="font-size:18px; padding:8px;" placeholder="請輸入國字">
-        `;
+          if(chosen.length)items.push(...chosen);
+          else unknown.push(
+            relevant.length
+              ?`${char}（${relevant.join("／")}）`
+              :char
+          );
+        }
+      }
     }
+  }
+
+  if(scope&&!["A","B","other","ALL"].includes(scope)){
+    return {error:"無法辨識進度檔類別。"};
+  }
+
+  return {items:unique(items),unknown,scope,hasData};
 }
 
-function renderOptions(options, isMulti) {
-    const qBox = document.getElementById('question-box');
-    options.forEach((opt, idx) => {
-        let btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerText = `${['A','B','C','D','E'][idx]}. ${opt.text}`;
-        btn.onclick = () => {
-            if(isMulti) {
-                btn.classList.toggle('selected');
-                if(currentQuiz.selectedOptions.includes(idx)) {
-                    currentQuiz.selectedOptions = currentQuiz.selectedOptions.filter(i => i !== idx);
-                } else {
-                    currentQuiz.selectedOptions.push(idx);
-                }
-            } else {
-                document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                currentQuiz.selectedOptions = [idx];
-            }
-        };
-        qBox.appendChild(btn);
-    });
+function rememberUndo(){
+  undoState=snapshot();
+  $("undo").disabled=false;
 }
 
-function submitAnswer() {
-    const q = currentQuiz.currentQ;
-    let isCorrect = false;
+function replaceScope(scope,items){
+  const groups=scope==="ALL"?Object.keys(GROUP_NAMES):[scope];
+  const accepted=items.filter(x=>matches(x,groups));
+  const acceptedKeys=new Set(accepted.map(key));
+  const affected=allItems.filter(x=>matches(x,groups));
+  const affectedKeys=new Set(affected.map(key));
 
-    if(q.type === 5 || q.type === 6) {
-        let userAns = document.getElementById('fill-answer').value.trim();
-        isCorrect = (userAns === q.answer);
-    } else if(q.type === 2) {
-        let userSet = new Set(currentQuiz.selectedOptions);
-        let ansSet = new Set(q.answer);
-        isCorrect = userSet.size === ansSet.size && [...userSet].every(x => ansSet.has(x));
-    } else {
-        isCorrect = currentQuiz.selectedOptions.length > 0 && currentQuiz.selectedOptions[0] === q.answer;
+  pending=pending.filter(id=>!affectedKeys.has(id));
+
+  for(const x of affected){
+    const id=key(x);
+    if(acceptedKeys.has(id)){
+      known.delete(id);
+      pending.push(id);
+    }else{
+      known.add(id);
     }
+  }
 
-    let target = q.targetItem;
-    if(isCorrect) {
-        target.streak = (target.streak || 0) + 1;
-    } else {
-        target.streak = 0;
-        target.wrongCount = (target.wrongCount || 0) + 1;
-    }
-    saveData();
-
-    let resBox = document.getElementById('result-box');
-    let resText = document.getElementById('result-text');
-    resBox.style.display = 'block';
-    document.getElementById('submit-btn').style.display = 'none';
-
-    if(isCorrect) {
-        resBox.className = "result-box correct";
-        resText.innerHTML = `<strong>恭喜答對！</strong> (連續答對次數：${target.streak}/5)`;
-    } else {
-        resBox.className = "result-box wrong";
-        let correctAnsText = q.answer;
-        if(Array.isArray(q.answer)) correctAnsText = q.answer.map(i => ['A','B','C','D','E'][i]).join(', ');
-        else if(typeof q.answer === 'number') correctAnsText = ['A','B','C','D','E'][q.answer];
-        
-        resText.innerHTML = `<strong>答錯了！</strong><br>正確答案為：<b>${correctAnsText}</b>`;
-    }
+  return accepted.length;
 }
 
-function nextQuestion() {
-    generateNextQuestion();
+$("import").onclick=()=>{
+  const text=$("input").value.trim();
+  if(!text){
+    setStatus("請先貼上進度文字。");
+    return;
+  }
+
+  const parsed=parseInput(text);
+  if(parsed.error){
+    setStatus(parsed.error);
+    return;
+  }
+
+  if(!parsed.items.length&&(parsed.hasData||!parsed.scope)){
+    setStatus("沒有可辨識的題庫項目；進度未變更。");
+    return;
+  }
+
+  const scope=parsed.scope||cardGroup;
+  const groups=scope==="ALL"?Object.keys(GROUP_NAMES):[scope];
+  const accepted=parsed.items.filter(x=>matches(x,groups));
+
+  if(parsed.items.length&&!accepted.length){
+    setStatus(
+      "貼上的項目不屬於此類；請選對類別或貼上含範圍標頭的匯出文字。"
+    );
+    return;
+  }
+
+  rememberUndo();
+  const count=replaceScope(scope,accepted);
+  if(scope!=="ALL")cardGroup=scope;
+
+  syncControls();
+  renderCard();
+  resetQuiz();
+  save();
+
+  const skipped=parsed.unknown.length
+    +parsed.items.length-accepted.length;
+
+  setStatus(
+    `已載入${scope==="ALL"?"全部類別":GROUP_NAMES[scope]}：`
+    +`${count} 項待複習；其餘本範圍項目已標記學會。`
+    +(skipped?` 略過 ${skipped} 個不符項目。`:"")
+  );
+};
+
+$("reset").onclick=()=>{
+  rememberUndo();
+  const affected=allItems.filter(x=>matches(x,[cardGroup]));
+  replaceScope(cardGroup,affected);
+  renderCard();
+  resetQuiz();
+  save();
+  setStatus(`已重設${GROUP_NAMES[cardGroup]}；可以按「復原」撤銷。`);
+};
+
+$("undo").onclick=()=>{
+  if(!undoState)return;
+  applyState(undoState);
+  undoState=null;
+  $("undo").disabled=true;
+  syncControls();
+  renderCard();
+  resetQuiz();
+  save();
+  setStatus("已復原上次匯入／重設前的進度。");
+};
+
+function pairId(a,b){
+  return [key(a),key(b)].sort().join("\n");
 }
+
+function pairPool(){
+  const items=pendingItems(quizGroups);
+  const pairs=[];
+
+  for(let i=0;i<items.length;i++){
+    for(let j=i+1;j<items.length;j++){
+      pairs.push({
+        a:items[i],
+        b:items[j],
+        same:items[i].reading===items[j].reading,
+        id:pairId(items[i],items[j])
+      });
+    }
+  }
+
+  return pairs;
+}
+
+function pickPair(pairs){
+  const same=pairs.filter(x=>x.same);
+  const different=pairs.filter(x=>!x.same);
+
+  const pool=same.length&&different.length
+    ?(Math.random()<.5?same:different)
+    :pairs;
+
+  const picked=pool[Math.floor(Math.random()*pool.length)];
+  return {...picked,answered:false};
+}
+
+function updateQuizScope(){
+  const n=pendingItems(quizGroups).length;
+
+  $("quiz-scope").textContent=
+    `範圍：${quizGroups.length
+      ?quizGroups.map(g=>GROUP_NAMES[g]).join("＋")
+      :"尚未選擇"}；${n} 項待複習。`
+    +"同一筆 A／B 共用字卡只計一次；已學會項目不出題。";
+
+  return n;
+}
+
+function showQuestion(q){
+  $("question").innerHTML=`${label(q.a)}<br>／<br>${label(q.b)}`;
+  $("choices").classList.remove("hidden");
+}
+
+function clearQuizUI(){
+  quiz=null;
+  exam=null;
+  $("feedback").classList.add("hidden");
+  $("next").classList.add("hidden");
+  $("choices").classList.add("hidden");
+  $("exam-results").classList.add("hidden");
+  $("exam-results").textContent="";
+}
+
+function resetQuiz(){
+  clearQuizUI();
+  examAnswerLocked=false;
+  $("same").disabled=$("different").disabled=false;
+  $("start-exam").textContent="開始考試";
+  quizN=correctN=0;
+  seenPairs.clear();
+
+  const n=updateQuizScope();
+  const isExam=quizMode==="exam";
+
+  $("exam-length-label").classList.toggle("hidden",!isExam);
+  $("start-exam").classList.toggle("hidden",!isExam);
+  $("start-exam").disabled=n<2;
+
+  $("mode-hint").textContent=isExam
+    ?"作答後自動進入下一題，全部完成後一起看分數與解答。"
+    :"作答後立即顯示解答；同音與不同音題型盡量均衡。";
+
+  if(isExam){
+    $("quiz-count").textContent="考試尚未開始";
+    $("quiz-score").textContent="";
+    $("question").textContent=n<2
+      ?(quizGroups.length
+        ?"至少需要兩項待複習字詞。"
+        :"請先勾選類別。")
+      :"準備好後按「開始考試」。";
+  }else{
+    generatePractice();
+  }
+}
+
+function generatePractice(){
+  $("feedback").classList.add("hidden");
+  $("next").classList.add("hidden");
+
+  const all=pairPool();
+  updateQuizScope();
+  $("quiz-count").textContent=`第 ${quizN+1} 題`;
+  $("quiz-score").textContent=`答對 ${correctN}／${quizN} 題`;
+
+  if(!all.length){
+    quiz=null;
+    $("question").textContent=quizGroups.length
+      ?"至少需要兩項待複習字詞。"
+      :"請先勾選類別。";
+    $("choices").classList.add("hidden");
+    return;
+  }
+
+  let pool=all.filter(x=>!seenPairs.has(x.id));
+  if(!pool.length){
+    seenPairs.clear();
+    pool=all;
+  }
+
+  quiz=pickPair(pool);
+  seenPairs.add(quiz.id);
+  showQuestion(quiz);
+}
+
+function detail(q){
+  return `<p>「${escapeHtml(q.a.char)}」`
+    +`（${escapeHtml(q.a.phrase)}）：${escapeHtml(q.a.reading)}</p>`
+    +`<p>「${escapeHtml(q.b.char)}」`
+    +`（${escapeHtml(q.b.phrase)}）：${escapeHtml(q.b.reading)}</p>`
+    +`<p>正確答案：${q.same?"相同":"不同"}</p>`
+    +[q.a,q.b].map(x=>
+      NOTES[key(x)]?`<p>${escapeHtml(NOTES[key(x)])}</p>`:""
+    ).join("");
+}
+
+function startExam(){
+  const pool=pairPool();
+  if(!pool.length)return;
+
+  const count=Math.min(Number($("exam-length").value),pool.length);
+  const selected=[];
+  const used=new Set();
+
+  for(let i=0;i<count;i++){
+    const q=pickPair(pool.filter(x=>!used.has(x.id)));
+    used.add(q.id);
+    selected.push(q);
+  }
+
+  clearQuizUI();
+  examAnswerLocked=false;
+  $("same").disabled=$("different").disabled=false;
+  exam={questions:selected,answers:[],index:0};
+  $("start-exam").classList.add("hidden");
+  $("quiz-score").textContent="作答中";
+  renderExamQuestion();
+}
+
+function renderExamQuestion(){
+  quiz=exam.questions[exam.index];
+  $("quiz-count").textContent=
+    `考試第 ${exam.index+1}／${exam.questions.length} 題`;
+  showQuestion(quiz);
+}
+
+function finishExam(){
+  const correct=exam.answers.filter(x=>x.correct).length;
+  const total=exam.questions.length;
+
+  $("choices").classList.add("hidden");
+  $("question").textContent="考試完成";
+  $("quiz-count").textContent=`已完成 ${total} 題`;
+  $("quiz-score").textContent=
+    `答對 ${correct}／${total} 題（${Math.round(correct/total*100)} 分）`;
+
+  $("exam-results").innerHTML=exam.answers.map((ans,i)=>
+    `<div class="exam-item">`
+    +`<strong class="${ans.correct?"result-right":"result-wrong"}">`
+    +`第 ${i+1} 題：${ans.correct?"答對":"答錯"}</strong>`
+    +`<p>${label(ans.question.a)}／${label(ans.question.b)}</p>`
+    +`<p>你的答案：${ans.choice?"相同":"不同"}</p>`
+    +detail(ans.question)
+    +`</div>`
+  ).join("");
+
+  $("exam-results").classList.remove("hidden");
+  $("start-exam").textContent="再考一次";
+  $("start-exam").classList.remove("hidden");
+  quiz=null;
+}
+
+function submit(choice){
+  if(!quiz||quiz.answered||examAnswerLocked)return;
+
+  quiz.answered=true;
+  const good=choice===quiz.same;
+
+  if(quizMode==="exam"&&exam){
+    examAnswerLocked=true;
+    $("same").disabled=$("different").disabled=true;
+
+    setTimeout(()=>{
+      examAnswerLocked=false;
+      $("same").disabled=$("different").disabled=false;
+    },250);
+
+    exam.answers.push({question:quiz,choice,correct:good});
+    exam.index++;
+
+    if(exam.index===exam.questions.length)finishExam();
+    else renderExamQuestion();
+    return;
+  }
+
+  quizN++;
+  if(good)correctN++;
+
+  $("feedback").className="answer"+(good?"":" wrong");
+  $("feedback").innerHTML=
+    `<strong>${good?"⭕ 答對了":"❌ 答錯了"}</strong>`+detail(quiz);
+
+  $("choices").classList.add("hidden");
+  $("next").classList.remove("hidden");
+  $("quiz-score").textContent=`答對 ${correctN}／${quizN} 題`;
+}
+
+$("same").onclick=()=>submit(true);
+$("different").onclick=()=>submit(false);
+$("next").onclick=generatePractice;
+$("start-exam").onclick=startExam;
+
+document.querySelectorAll(".filters input").forEach(c=>{
+  c.onchange=()=>{
+    quizGroups=[...document.querySelectorAll(".filters input:checked")]
+      .map(x=>x.value);
+    resetQuiz();
+    save();
+  };
+});
+
+$("quiz-mode").onchange=()=>{
+  quizMode=$("quiz-mode").value;
+  resetQuiz();
+  save();
+};
+
+$("exam-length").onchange=resetQuiz;
+
+for(const [name,other] of [["card","quiz"],["quiz","card"]]){
+  $("tab-"+name).onclick=()=>{
+    $("panel-"+name).classList.remove("hidden");
+    $("panel-"+other).classList.add("hidden");
+    $("tab-"+name).setAttribute("aria-selected","true");
+    $("tab-"+other).setAttribute("aria-selected","false");
+    if(name==="quiz")resetQuiz();
+  };
+}
+
+restore();
+syncControls();
+renderCard();
+resetQuiz();
+save();
 </script>
-
 </body>
 </html>
