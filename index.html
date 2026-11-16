@@ -3,143 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國語字音字形練習網頁</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>字音練習與閃卡系統</title>
     <style>
         :root {
-            --bg-color: #f4f6f9;
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --success: #2ec4b6;
+            --danger: #e63946;
+            --bg: #f8f9fa;
             --card-bg: #ffffff;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #10b981;
-            --success-hover: #059669;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --text-main: #1f2937;
-            --text-sub: #4b5563;
-            --border: #e5e7eb;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --text: #2b2d42;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 24px 16px;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         header {
+            margin-bottom: 20px;
             text-align: center;
-            margin-bottom: 24px;
-            width: 100%;
-            max-width: 680px;
         }
 
         h1 {
-            font-size: 26px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 16px;
-            letter-spacing: -0.5px;
+            color: var(--secondary);
+            margin-bottom: 15px;
         }
 
-        .nav-container {
+        .nav-tabs {
             display: flex;
-            background: #e2e8f0;
-            padding: 4px;
-            border-radius: 12px;
-            gap: 4px;
-            max-width: 400px;
-            margin: 0 auto;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .nav-tab {
-            flex: 1;
-            padding: 10px 16px;
+        .tab-btn {
+            padding: 10px 20px;
             border: none;
-            background: transparent;
-            font-size: 15px;
-            font-weight: 500;
-            color: #64748b;
-            border-radius: 8px;
+            background: #e0e0e0;
             cursor: pointer;
-            transition: all 0.2s ease;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
         }
 
-        .nav-tab.active {
-            background: #ffffff;
-            color: var(--primary);
-            font-weight: 700;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
         }
 
-        .main-container {
+        .container {
             width: 100%;
-            max-width: 680px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            padding: 32px 24px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            max-width: 600px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        .section {
+        .mode-section {
             display: none;
         }
 
-        .section.active {
-            display: block;
-        }
-
-        .progress-bar-container {
+        .mode-section.active {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: var(--text-sub);
-            font-weight: 500;
         }
 
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .badge-pending { background: #fef3c7; color: #d97706; }
-        .badge-done { background: #d1fae5; color: #059669; }
-
-        .card-perspective {
-            perspective: 1000px;
+        /* Flashcard Controls & Card */
+        .card-container {
             width: 100%;
-            height: 240px;
-            margin-bottom: 24px;
+            height: 220px;
+            perspective: 1000px;
             cursor: pointer;
+            margin: 20px 0;
         }
 
-        .flashcard {
+        .card {
             width: 100%;
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 16px;
+            transition: transform 0.6s;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
-        .flashcard.flipped {
+        .card.flipped {
             transform: rotateY(180deg);
         }
 
@@ -148,959 +111,480 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 16px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 24px;
-            border: 2px solid #f1f5f9;
-        }
-
-        .card-front {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8);
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            background: var(--card-bg);
+            padding: 20px;
+            text-align: center;
         }
 
         .card-back {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             transform: rotateY(180deg);
-            border-color: #bfdbfe;
+            background: #f0f7ff;
         }
 
-        .card-word {
-            font-size: 48px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 8px;
-        }
-
-        .card-hint {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-top: 8px;
-        }
-
-        .card-pinyin {
-            font-size: 32px;
-            font-weight: 700;
-            color: #2563eb;
-            margin-bottom: 8px;
-        }
-
-        .card-phrase {
-            font-size: 20px;
-            font-weight: 500;
-            color: #334155;
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-know {
-            background-color: var(--success);
-            color: white;
-        }
-        .btn-know:hover { background-color: var(--success-hover); }
-
-        .btn-unknow {
-            background-color: var(--danger);
-            color: white;
-        }
-        .btn-unknow:hover { background-color: var(--danger-hover); }
-
-        .btn-choice {
-            font-size: 28px;
-            padding: 18px;
-            border-radius: 16px;
-        }
-
-        .io-container {
-            border-top: 1px dashed #cbd5e1;
-            padding-top: 20px;
-        }
-
-        .io-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 8px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 13px;
-            color: #334155;
-            resize: vertical;
+        .char-text {
+            font-size: 42px;
+            font-weight: bold;
+            color: var(--secondary);
             margin-bottom: 10px;
-            background: #f8fafc;
         }
 
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: #ffffff;
+        .pinyin-text {
+            font-size: 28px;
+            color: var(--danger);
+            font-weight: bold;
         }
 
-        .io-btn-row {
+        .word-text {
+            font-size: 20px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        .btn-group {
             display: flex;
-            gap: 8px;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 10px;
         }
 
-        .btn-secondary {
-            padding: 8px 16px;
-            background: #e2e8f0;
-            color: #334155;
-            font-size: 13px;
-            font-weight: 600;
+        .action-btn {
+            padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
+            color: white;
+            transition: opacity 0.2s;
         }
-        .btn-secondary:hover { background: #cbd5e1; }
 
-        .quiz-card {
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-know { background-color: var(--success); }
+        .btn-unknow { background-color: var(--danger); }
+        .btn-circle { background-color: var(--success); font-size: 24px; width: 100px; }
+        .btn-cross { background-color: var(--danger); font-size: 24px; width: 100px; }
+
+        .progress-text {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .io-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .io-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Practice Quiz Style */
+        .quiz-question {
+            font-size: 20px;
             text-align: center;
-            padding: 10px 0;
+            margin-bottom: 20px;
+            line-height: 1.6;
         }
 
-        .quiz-title {
-            font-size: 15px;
-            color: var(--text-sub);
-            margin-bottom: 16px;
+        .quiz-target {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--secondary);
+            margin: 10px 0;
+            padding: 10px;
+            background: #eef4f8;
+            border-radius: 8px;
+            display: inline-block;
         }
 
-        .quiz-question-box {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
+        .quiz-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            width: 100%;
+            text-align: center;
+            display: none;
         }
 
-        .quiz-question-text {
-            font-size: 24px;
-            font-weight: 700;
-            color: #0f172a;
+        .quiz-result.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .quiz-result.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .detail-info {
+            margin-top: 10px;
+            font-size: 16px;
+            text-align: left;
             line-height: 1.5;
         }
-
-        .result-box {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 14px;
-            text-align: left;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-box.correct {
-            background-color: #ecfdf5;
-            border: 1px solid #a7f3d0;
-            color: #065f46;
-        }
-
-        .result-box.wrong {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-        }
-
-        .result-status {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .result-detail {
-            font-size: 15px;
-            line-height: 1.8;
-            color: #334155;
-            background: #ffffff;
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .next-btn {
-            width: 100%;
-            margin-top: 16px;
-            background: #1e293b;
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-        }
-        .next-btn:hover { background: #0f172a; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>國語字音字形自主練習系統</h1>
-        <div class="nav-container">
-            <button class="nav-tab active" onclick="switchTab('flashcard')">閃卡模式</button>
-            <button class="nav-tab" onclick="switchTab('quiz')">是非題練習</button>
+        <h1>高額國語字音字形練習系統</h1>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchMode('flashcard')">Flashcard 閃卡庫</button>
+            <button class="tab-btn" onclick="switchMode('quiz')">是非題練習</button>
         </div>
     </header>
 
-    <div class="main-container">
-        
-        <!-- FLASHCARD SECTION -->
-        <div id="flashcard-section" class="section active">
-            <div class="progress-bar-container">
-                <span class="badge badge-pending" id="count-pending">還沒會：0</span>
-                <span class="badge badge-done" id="count-done">已經會：0</span>
-            </div>
-
-            <div class="card-perspective" onclick="flipFlashcard()">
-                <div class="flashcard" id="fc-card">
+    <div class="container">
+        <!-- 閃卡模式 -->
+        <div id="flashcard-mode" class="mode-section active">
+            <div class="progress-text" id="fc-progress">剩餘未熟練：0 / 已學會：0</div>
+            
+            <div class="card-container" onclick="flipCard()">
+                <div class="card" id="flashcard">
                     <div class="card-front">
-                        <div class="card-word" id="fc-word">載入中</div>
-                        <div class="card-hint">（點擊卡片顯示正確讀音）</div>
+                        <div class="char-text" id="fc-word">字詞載入中...</div>
+                        <p style="color: #888; font-size: 12px;">(點擊卡片翻面看讀音)</p>
                     </div>
                     <div class="card-back">
-                        <div class="card-pinyin" id="fc-pinyin">讀音</div>
-                        <div class="card-phrase" id="fc-phrase">詞組</div>
+                        <div class="pinyin-text" id="fc-pinyin">讀音</div>
+                        <div class="word-text" id="fc-detail">詞組說明</div>
                     </div>
                 </div>
             </div>
 
-            <div class="btn-row">
-                <button class="btn btn-unknow" onclick="answerFlashcard(false)">還沒記住 ❌</button>
-                <button class="btn btn-know" onclick="answerFlashcard(true)">已經學會 ⭕</button>
+            <div class="btn-group">
+                <button class="action-btn btn-unknow" onclick="markCard(false)">還沒記住 ❌</button>
+                <button class="action-btn btn-know" onclick="markCard(true)">已經學會 ⭕</button>
             </div>
 
-            <div class="io-container">
-                <div class="io-title">進度文字匯入 / 匯出 (格式同原始輸入文字)</div>
-                <textarea id="io-textarea" placeholder="在此處貼上文字進行匯入，或點擊匯出複製目前剩餘的範圍..."></textarea>
-                <div class="io-btn-row">
-                    <button class="btn-secondary" onclick="exportText()">複製目前未學會範圍 (匯出)</button>
-                    <button class="btn-secondary" onclick="importText()">載入文字 (匯入)</button>
-                </div>
+            <div class="io-group">
+                <button class="io-btn" onclick="exportData()">匯出進度</button>
+                <button class="io-btn" onclick="document.getElementById('importFile').click()">匯入進度</button>
+                <input type="file" id="importFile" style="display:none" onchange="importData(event)" accept=".json">
             </div>
         </div>
 
-        <!-- QUIZ SECTION -->
-        <div id="quiz-section" class="section">
-            <div class="quiz-card">
-                <div class="quiz-title">請判斷下方兩個字詞中的目標字，其【注音/讀音】是否相同：</div>
-                
-                <div class="quiz-question-box">
-                    <div class="quiz-question-text" id="quiz-question-display">
-                        題目：「腊」臘肉／「蜡」蜡賓
-                    </div>
-                </div>
+        <!-- 是非題練習模式 -->
+        <div id="quiz-mode" class="mode-section">
+            <div class="quiz-question">
+                請判斷以下兩個字詞的<br><strong>【主要讀音/聲調是否相同】</strong>：
+                <div class="quiz-target" id="quiz-target-text">載入中...</div>
+            </div>
 
-                <div class="btn-row" id="quiz-btn-row">
-                    <button class="btn btn-know btn-choice" onclick="submitQuiz(true)">⭕ 相同</button>
-                    <button class="btn btn-unknow btn-choice" onclick="submitQuiz(false)">❌ 不同</button>
-                </div>
+            <div class="btn-group" id="quiz-btns">
+                <button class="action-btn btn-circle" onclick="submitAnswer(true)">⭕</button>
+                <button class="action-btn btn-cross" onclick="submitAnswer(false)">❌</button>
+            </div>
 
-                <div class="result-box" id="quiz-result-box">
-                    <div class="result-status" id="quiz-result-status"></div>
-                    <div class="result-detail" id="quiz-result-detail"></div>
-                    <button class="next-btn" onclick="generateQuiz()">下一題 ➔</button>
-                </div>
+            <div id="quiz-result" class="quiz-result">
+                <div id="quiz-status" style="font-size: 20px; font-weight: bold;"></div>
+                <div id="quiz-detail" class="detail-info"></div>
+                <button class="action-btn" style="background: var(--primary); margin-top: 15px;" onclick="nextQuiz()">下一題</button>
             </div>
         </div>
-
     </div>
 
     <script>
-        const defaultRawText = `字音
-椸施（施及）
-麃轆簏
-甃湫愀
-嘏葭
-縐芻謅
-罾矰甑
-亢頏
-僦憱蹴
-邳抔
-睥
-菲（菲衣薄食）緋腓
-詘
-剄痙
-磽蹺
-轓墦播
-佁
-窬
-遁楯
-哆（披哆）黟
-扃
-齜髭訾（訾議）（財訾）眥
-閹（閹然）崦
-雹匏皰枹
-塿（培塿）簍鏤窶
-咯（咯血）
-蛉翎
-嫵廡憮（憮然）
-慳
-韋幃韙煒暐韞
-刳姱洿
-寥僇瘳醪繆（山川相繆／繆小姐／綢繆）蓼（蓼莪／紅蓼）
-倬踔
-俎疽趄苴齟咀菹（菹醢）
-醅踣培掊（一掊土／掊斗折衡）
-蹩
-餂
-歆諳闇
-俛浼
-戧愴傖
-赭渚翥楮
-妗衾
-鼴
-腊踖蜡
-憒
-懧
-衢癯瞿（瞿先生／瞿然）攫
-帑呶孥
-邅饘蟺
-驁聱
-庋跂忮
-梧寤圄齬
-縞嚆皜鎬
-廋庾
-蹇謇騫搴褰
-闐瑱瞋嗔
-鯫諏陬
-黥黔
-啗萏閻
-儔擣鑄
-鬑髡
-裾据琚踞倨
-觭掎踦
-遽噱（發噱）璩
-顓遄
-曷愒
-垓欬（謦欬）頦
-倡（倡優）娼
-拂怫
-胛匣
-湄
-齎虀薺
-槊
-晡逋餔脯
-蒹縑慊（慊慊／不慊於心）
-羝坻詆
-豳遯圂燹豕
-酹醨
-倔（倔強）淈
-涘俟騃欸
-劬雊痀姁
-槎瘥嵯
-捋（捋髭鬚／捋虎鬚／揎拳捋袖）埒酹
-隅喁顒
-帩誚綃
-逶
-峻浚悛
-毖毗貔
-鏑嘀擿
-檄繳（弓繳）
-孚桴莩
-瞳艟幢
-咷洮佻晁
-竑紘閎
-蹬
-綸掄淪
-罍纍壘（神荼鬱壘）
-掏
-嫘縲
-舴怍阼酢
-儋澹
-鈿畦
-洒哂
-姮揎
-摶`;
+        // 原始列資料整理 (橫排分類，全範圍資料)
+        const rawGroups = [
+            [{w:"椸", p:"ㄧˊ", d:"椸 (衣架)"}, {w:"施及", p:"ㄧˋ ㄐㄧˊ", d:"施及 (延及)"}],
+            [{w:"麃", p:"ㄅㄧㄠ", d:"麃 (麃麃)"}, {w:"轆", p:"ㄌㄨˋ", d:"轆 (轆轤)"}, {w:"簏", p:"ㄌㄨˋ", d:"簏 (竹箱)"}],
+            [{w:"甃", p:"ㄓㄡˋ", d:"甃 (井壁)"}, {w:"湫", p:"ㄑㄧㄡ", d:"湫 (水池/低窪)"}, {w:"愀", p:"ㄑㄧㄠˇ", d:"愀 (愀然)"}],
+            [{w:"嘏", p:"ㄍㄨˇ", d:"嘏 (祝嘏/福)"}, {w:"葭", p:"ㄐㄧㄚ", d:"葭 (蒹葭)"}],
+            [{w:"縐", p:"ㄓㄡˋ", d:"縐 (縐紗)"}, {w:"芻", p:"ㄔㄨ", d:"芻 (芻議/芻狗)"}, {w:"謅", p:"ㄗㄡ", d:"謅 (胡謅)"}],
+            [{w:"罾", p:"ㄗㄥ", d:"罾 (魚網)"}, {w:"矰", p:"ㄗㄥ", d:"矰 (繫繩的箭)"}, {w:"甑", p:"ㄗㄥˋ", d:"甑 (甑塵釜魚)"}],
+            [{w:"亢", p:"ㄎㄤˋ", d:"亢 (高亢)"}, {w:"頏", p:"ㄏㄤˊ", d:"頏 (頡頏)"}],
+            [{w:"僦", p:"ㄐㄧㄡˋ", d:"僦 (僦屋/租用)"}, {w:"憱", p:" brownies/ㄘㄨˋ", d:"憱 (憱爾/不安)"}, {w:"蹴", p:"ㄘㄨˋ", d:"蹴 (蹴罷/踢)"}],
+            [{w:"邳", p:"ㄆㄟˊ", d:"邳 (邳州)"}, {w:"抔", p:"ㄆㄡˊ", d:"抔 (一抔土)"}],
+            [{w:"睥", p:"ㄅㄧˋ", d:"睥 (睥睨)"}],
+            [{w:"菲衣薄食", p:"ㄈㄟ ㄧ ㄅㄛˊ ㄕˊ", d:"菲衣薄食"}, {w:"緋", p:"ㄈㄟ", d:"緋 (緋紅)"}, {w:"腓", p:"ㄈㄟˊ", d:"腓 (腓腸肌/避)"}],
+            [{w:"詘", p:"ㄑㄩ", d:"詘 (屈詘/屈服)"}],
+            [{w:"剄", p:"ㄐㄧㄥˇ", d:"剄 (自剄)"}, {w:"痙", p:"ㄐㄧㄥˋ", d:"痙 (痙攣)"}],
+            [{w:"磽", p:"ㄑㄧㄠ", d:"磽 (磽瘠)"}, {w:"蹺", p:"ㄑㄧㄠ", d:"蹺 (蹺跤/蹺蹺板)"}],
+            [{w:"轓", p:"ㄈㄢ", d:"轓 (車蔽)"}, {w:"墦", p:"ㄈㄢˊ", d:"墦 (墦間)"}, {w:"播", p:"ㄅㄛˋ", d:"播 (播種)"}],
+            [{w:"佁", p:"ㄧˇ", d:"佁 (佁然不動)"}],
+            [{w:"窬", p:"ㄩˊ", d:"窬 (穿窬)"}],
+            [{w:"遁", p:"ㄉㄨㄣˋ", d:"遁 (遁逃)"}, {w:"楯", p:"ㄕㄨㄣˇ", d:"楯 (欄楯/盾)"}],
+            [{w:"披哆", p:"ㄆㄧ ㄔˇ", d:"披哆 (張開)"}, {w:"黟", p:"ㄧ", d:"黟 (黑木/縣名)"}],
+            [{w:"扃", p:"ㄐㄧㄥ", d:"扃 (扃門/門閂)"}],
+            [{w:"齜", p:"ㄗ", d:"齜 (齜牙)"}, {w:"髭", p:"ㄗ", d:"髭 (鬍髭)"}, {w:"訾議", p:"ㄗˇ ㄧˋ", d:"訾議 (非議)"}, {w:"財訾", p:"ㄘㄞˊ ㄗ", d:"財訾 (資財)"}, {w:"眥", p:"ㄗˋ", d:"眥 (眼眥)"}],
+            [{w:"閹然", p:"ㄧㄢ ㄖㄢˊ", d:"閹然 (媚世貌)"}, {w:"崦", p:"ㄧㄢ", d:"崦 (崦嵁)"}],
+            [{w:"雹", p:"ㄅㄠˊ", d:"雹 (冰雹)"}, {w:"匏", p:"ㄆㄠˊ", d:"匏 (匏瓜)"}, {w:"皰", p:"ㄆㄠˋ", d:"皰 (面皰)"}, {w:"枹", p:"ㄈㄨˊ", d:"枹 (鼓桴/鼓槌)"}],
+            [{w:"培塿", p:"ㄆㄡˇ ㄌㄡˇ", d:"培塿 (小丘)"}, {w:"簍", p:"ㄌㄡˇ", d:"簍 (竹簍)"}, {w:"鏤", p:"ㄌㄡˋ", d:"鏤 (鏤刻)"}, {w:"窶", p:"ㄐㄩˋ", d:"窶 (貧窶)"}],
+            [{w:"咯血", p:"ㄎㄚˇ ㄒㄩㄝˇ", d:"咯血 (吐血)"}],
+            [{w:"蛉", p:"ㄌㄧㄥˊ", d:"蛉 (螟蛉)"}, {w:"翎", p:"ㄌㄧㄥˊ", d:"翎 (羽翎)"}],
+            [{w:"嫵", p:"ㄨˇ", d:"嫵 (嫵媚)"}, {w:"廡", p:"ㄨˇ", d:"廡 (廊廡)"}, {w:"憮然", p:"ㄨˇ ㄖㄢˊ", d:"憮然 (失意貌)"}],
+            [{w:"慳", p:"ㄑㄧㄢ", d:"慳 (慳吝)"}],
+            [{w:"韋", p:"ㄨㄟˊ", d:"韋 (韋編)"}, {w:"幃", p:"ㄨㄟˊ", d:"幃 (帷幃)"}, {w:"韙", p:"ㄨㄟˇ", d:"韙 (犯天下之大不韙)"}, {w:"煒", p:"ㄨㄟˇ", d:"煒 (煒燁)"}, {w:"暐", p:"ㄨㄟˇ", d:"暐 (暐暐)"}, {w:"韞", p:"ㄩㄣˋ", d:"韞 (韞櫝)"}],
+            [{w:"刳", p:"ㄎㄨ", d:"刳 (刳木)"}, {w:"姱", p:"ㄎㄨㄚ", d:"姱 (姱容)"}, {w:"洿", p:"ㄨ", d:"洿 (洿池)"}],
+            [{w:"寥", p:"ㄌㄧㄠˊ", d:"寥 (寂寥)"}, {w:"僇", p:"ㄌㄨˋ", d:"僇 (戮/僇人)"}, {w:"瘳", p:"ㄔㄡ", d:"瘳 (痊瘳)"}, {w:"醪", p:"ㄌㄠˊ", d:"醪 (濁醪)"}, {w:"山川相繆", p:"ㄕㄢ ㄔㄨㄢ ㄒㄧㄤ ㄌㄧㄠˊ", d:"山川相繆"}, {w:"繆小姐", p:"ㄇㄧㄠˋ ㄒㄧㄠˇ ㄐㄧㄝˇ", d:"繆小姐 (姓氏)"}, {w:"綢繆", p:"ㄔㄡˊ ㄇㄡˊ", d:"綢繆"}, {w:"蓼莪", p:"ㄌㄨˋ ㄜˊ", d:"蓼莪 (詩經篇名)"}, {w:"紅蓼", p:"ㄌㄧㄠˇ", d:"紅蓼 (植物名)"}],
+            [{w:"倬", p:"ㄓㄨㄛ", d:"倬 (倬立/顯著)"}, {w:"踔", p:"ㄓㄨㄛ", d:"踔 (踔厲風發)"}],
+            [{w:"俎", p:"ㄗㄨˇ", d:"俎 (俎豆)"}, {w:"疽", p:"ㄐㄩ", d:"疽 (癰疽)"}, {w:"趄", p:"ㄐㄩ", d:"趄 (趑趄)"}, {w:"苴", p:"ㄐㄩ", d:"苴 (履苴/草鞋)"}, {w:"齟", p:"ㄐㄩˇ", d:"齟 (齟齬)"}, {w:"咀", p:"ㄐㄩˇ", d:"咀 (咀嚼)"}, {w:"菹醢", p:"ㄗㄨ ㄏㄞˇ", d:"菹醢 (肉醬/肉醢)"}],
+            [{w:"醅", p:"ㄆㄟ", d:"醅 (濁醅)"}, {w:"踣", p:"ㄅㄛˊ", d:"踣 (踣地/倒地)"}, {w:"培", p:"ㄆㄟˊ", d:"培 (培育)"}, {w:"一掊土", p:"ㄧ ㄆㄡˊ ㄊㄨˇ", d:"一掊土"}, {w:"掊斗折衡", p:"ㄆㄡˇ ㄉㄡˇ ㄓㄜˊ ㄏㄥˊ", d:"掊斗折衡 (破毀斗衡)"}],
+            [{w:"蹩", p:"ㄅㄧㄝˊ", d:"蹩 (蹩腳)"}],
+            [{w:"餂", p:"ㄊㄧㄢˇ", d:"餂 (餂誘/誘取)"}],
+            [{w:"歆", p:"ㄒㄧㄣ", d:"歆 (歆羨)"}, {w:"諳", p:"ㄢ", d:"諳 (諳熟)"}, {w:"闇", p:"ㄢˋ", d:"闇 (闇練/暗)"}],
+            [{w:"俛", p:"ㄈㄨˇ", d:"俛 (俛首/俯)"}, {w:"浼", p:"ㄇㄟˇ", d:"浼 (浼托/污染)"}],
+            [{w:"戧", p:"ㄑㄧㄤˋ", d:"戧 (戧金)"}, {w:"愴", p:"ㄔㄨㄤˋ", d:"愴 (悲愴)"}, {w:"傖", p:"ㄘㄤ", d:"傖 (傖俗/粗俗)"}],
+            [{w:"赭", p:"ㄓㄜˇ", d:"赭 (赭石)"}, {w:"渚", p:"ㄓㄨˇ", d:"渚 (江渚)"}, {w:"翥", p:"ㄓㄨˋ", d:"翥 (翱翥/高飛)"}, {w:"楮", p:"ㄔㄨˇ", d:"楮 (楮幣/紙錢)"}],
+            [{w:"妗", p:"ㄐㄧㄣˋ", d:"妗 (舅母)"}, {w:"衾", p:"ㄑㄧㄣ", d:"衾 (衾枕)"}],
+            [{w:"鼴", p:"ㄧㄢˇ", d:"鼴 (鼴鼠)"}],
+            [{w:"腊", p:"ㄒㄧ̄ / ㄌㄚˋ", d:"腊 (干肉/腊肉)"}, {w:"踖", p:"ㄐㄧˊ", d:"踖 (踖踖/恭敬貌)"}, {w:"蜡", p:"ㄓㄚˋ", d:"蜡 (蜡祭)"}],
+            [{w:"憒", p:"ㄎㄨㄟˋ", d:"憒 (昏憒)"}],
+            [{w:"懧", p:"ㄋㄨㄛˋ", d:"懧 (怯懧/懦弱)"}],
+            [{w:"衢", p:"ㄑㄩ", d:"衢 (通衢)"}, {w:"癯", p:"ㄑㄩ", d:"癯 (清癯/瘦弱)"}, {w:"瞿先生", p:"ㄑㄩˊ ㄒㄧㄢ ㄕㄥ", d:"瞿先生 (姓氏)"}, {w:"瞿然", p:"ㄐㄩˋ ㄖㄢˊ", d:"瞿然 (驚視貌)"}, {w:"攫", p:"ㄐㄩㄝˊ", d:"攫 (攫取)"}],
+            [{w:"帑", p:"ㄊㄤˇ", d:"帑 (帑藏)"}, {w:"呶", p:"ㄋㄠˊ", d:"呶 (呶呶不休)"}, {w:"孥", p:"ㄋㄨˊ", d:"孥 (妻孥)"}],
+            [{w:"邅", p:"ㄓㄢ", d:"邅 (邅回/困頓)"}, {w:"饘", p:"ㄓㄢ", d:"饘 (饘粥)"}, {w:"蟺", p:"ㄕㄢ", d:"蟺 (蚯蟺)"}],
+            [{w:"驁", p:"ㄠˊ", d:"驁 (桀驁)"}, {w:"聱", p:"ㄠˊ", d:"聱 (聱牙)"}],
+            [{w:"庋", p:"ㄍㄨㄟˇ", d:"庋 (庋藏)"}, {w:"跂", p:"ㄑㄧˇ", d:"跂 (跂望/企)"}, {w:"忮", p:"ㄓˋ", d:"忮 (忮求)"}],
+            [{w:"梧", p:"ㄨˊ", d:"梧 (梧桐)"}, {w:"寤", p:"ㄨˋ", d:"寤 (寤寐)"}, {w:"圄", p:"ㄩˇ", d:"圄 (囹圄)"}, {w:"齬", p:"ㄩˇ", d:"齬 (齟齬)"}],
+            [{w:"縞", p:"ㄍㄠˇ", d:"縞 (縞素)"}, {w:"嚆", p:"ㄏㄠ", d:"嚆 (嚆矢)"}, {w:"皜", p:"ㄏㄠˋ", d:"皜 (皜皜/潔白)"}, {w:"鎬", p:"ㄏㄠˇ", d:"鎬 (鎬京)"}],
+            [{w:"廋", p:"ㄙㄡ", d:"廋 (廋詞/隱語)"}, {w:"庾", p:"ㄩˇ", d:"庾 (倉庾)"}],
+            [{w:"蹇", p:"ㄐㄧㄢˇ", d:"蹇 (蹇滯)"}, {w:"謇", p:"ㄐㄧㄢˇ", d:"謇 (謇謇/直言)"}, {w:"騫", p:"ㄑㄧㄢ", d:"騫 (騫騰)"}, {w:"搴", p:"ㄑㄧㄢ", d:"搴 (搴旗)"}, {w:"褰", p:"ㄑㄧㄢ", d:"褰 (褰裳)"}],
+            [{w:"闐", p:"ㄊㄧㄢˊ", d:"闐 (闐寂/賓客盈門)"}, {w:"瑱", p:"ㄊㄧㄢˋ", d:"瑱 (玉瑱)"}, {w:"瞋", p:"ㄔㄣ", d:"瞋 (瞋目)"}, {w:"嗔", p:"ㄔㄣ", d:"嗔 (嗔怪)"}],
+            [{w:"鯫", p:"ㄗㄡ", d:"鯫 (鯫生/微賤之人)"}, {w:"諏", p:"ㄗㄡ", d:"諏 (諮諏)"}, {w:"陬", p:"ㄗㄡ", d:"陬 (陬角落)"}],
+            [{w:"黥", p:"ㄑㄧㄥˊ", d:"黥 (黥刑)"}, {w:"黔", p:"ㄑㄧㄢˊ", d:"黔 (黔首)"}],
+            [{w:"啗", p:"ㄉㄢˋ", d:"啗 (啗食)"}, {w:"菡", p:"ㄏㄢˋ", d:"菡 (菡萏)"}, {w:"閻", p:"ㄧㄢˊ", d:"閻 (閻羅)"}],
+            [{w:"儔", p:"ㄔㄡˊ", d:"儔 (儔類)"}, {w:"擣", p:"ㄉㄠˇ", d:"擣 (擣衣/搗)"}, {w:"鑄", p:"ㄓㄨˋ", d:"鑄 (鑄造)"}],
+            [{w:"鬑", p:"ㄌㄧㄢˊ", d:"鬑 (鬑鬑)"}, {w:"髡", p:"ㄎㄨㄣ", d:"髡 (髡刑)"}],
+            [{w:"裾", p:"ㄐㄩ", d:"裾 (裙裾)"}, {w:"据", p:"ㄐㄩ", d:"据 (拮据)"}, {w:"琚", p:"ㄐㄩ", d:"琚 (佩琚)"}, {w:"踞", p:"ㄐㄩˋ", d:"踞 (盤踞)"}, {w:"倨", p:"ㄐㄩˋ", d:"倨 (倨傲)"}],
+            [{w:"觭", p:"ㄐㄧ", d:"觭 (觭輪/一角)"}, {w:"掎", p:"ㄐㄧˇ", d:"掎 (掎角之勢)"}, {w:"踦", p:"ㄐㄧ", d:"踦 (踦閭)"}],
+            [{w:"遽", p:"ㄐㄩˋ", d:"遽 (急遽)"}, {w:"發噱", p:"ㄈㄚ ㄐㄩㄝˊ", d:"發噱"}, {w:"璩", p:"ㄑㄩˊ", d:"璩 (玉環/姓氏)"}],
+            [{w:"顓", p:"ㄓㄨㄢ", d:"顓 (顓頊)"}, {w:"遄", p:"ㄔㄨㄢˊ", d:"遄 (遄往/快速)"}],
+            [{w:"曷", p:"ㄏㄜˊ", d:"曷 (曷勝感戴)"}, {w:"愒", p:"ㄎㄞˋ", d:"愒 (玩歲愒日)"}],
+            [{w:"垓", p:"ㄍㄞ", d:"垓 (垓下)"}, {w:"謦欬", p:"ㄑㄧㄥˇ ㄎㄞˋ", d:"謦欬 (談笑/咳嗽)"}, {w:"頦", p:"ㄏㄞˊ", d:"頦 (頷頦)"}],
+            [{w:"倡優", p:"Traditional ㄔㄤ ㄧㄡ", p:"ㄔㄤ ㄧㄡ", d:"倡優 (演藝人員)"}, {w:"娼", p:"ㄔㄤ", d:"娼 (娼妓)"}],
+            [{w:"拂", p:"ㄈㄨˊ", d:"拂 (拂袖)"}, {w:"怫", p:"ㄈㄨˊ", d:"怫 (怫然)"}],
+            [{w:"胛", p:"ㄐㄧㄚˇ", d:"胛 (肩胛)"}, {w:"匣", p:"ㄒㄧㄚˊ", d:"匣 (木匣)"}],
+            [{w:"湄", p:"ㄇㄟˊ", d:"湄 (水湄)"}],
+            [{w:"齎", p:"ㄐㄧ", d:"齎 (齎志以歿)"}, {w:"虀", p:"ㄐㄧ", d:"虀 (斷虀畫粥)"}, {w:"薺", p:"ㄐㄧˋ", d:"薺 (薺菜)"}],
+            [{w:"槊", p:"ㄕㄨㄛˋ", d:"槊 (橫槊賦詩)"}],
+            [{w:"晡", p:"ㄅㄨ", d:"晡 (晡時)"}, {w:"逋", p:"ㄅㄨ", d:"逋 (逋逃)"}, {w:"餔", p:"ㄅㄨ", d:"餔 (餔啜)"}, {w:"脯", p:"ㄈㄨˇ", d:"脯 (肉脯)"}],
+            [{w:"蒹", p:"ㄐㄧㄢ", d:"蒹 (蒹葭)"}, {w:"縑", p:"ㄐㄧㄢ", d:"縑 (縑帛)"}, {w:"慊慊", p:"ㄑㄧㄢˋ ㄑㄧㄢˋ", d:"慊慊 (不滿足貌)"}, {w:"不慊於心", p:"ㄅㄨˋ ㄑㄧㄝˋ ㄩˊ ㄒㄧㄣ", d:"不慊於心 (心不滿意)"}],
+            [{w:"羝", p:"ㄉㄧ", d:"羝 (羝羊)"}, {w:"坻", p:"ㄔˊ", d:"坻 (渚坻)"}, {w:"詆", p:"ㄉㄧˇ", d:"詆 (詆毀)"}],
+            [{w:"豳", p:"ㄅㄧㄣ", d:"豳 (豳風)"}, {w:"遯", p:"ㄉㄨㄣˋ", d:"遯 (遯世)"}, {w:"圂", p:"ㄏㄨㄣˋ", d:"圂 (豬圈/廁所)"}, {w:"燹", p:"ㄒㄧㄢˇ", d:"燹 (兵燹)"}, {w:"豕", p:"ㄕˇ", d:"豕 (豕突)"}],
+            [{w:"酹", p:"ㄌㄟˋ", d:"酹 (奠酹)"}, {w:"醨", p:"ㄌㄧˊ", d:"醨 (釃酒/薄酒)"}],
+            [{w:"倔強", p:"ㄐㄩㄝˊ ㄐㄧㄤˋ", d:"倔強"}, {w:"淈", p:"ㄍㄨˇ", d:"淈 (淈泥)"}],
+            [{w:"涘", p:"ㄙˋ", d:"涘 (水涘)"}, {w:"俟", p:"ㄙˋ", d:"俟 (俟機)"}, {w:"", p:"ㄞˊ", d:"騃 (騃呆)"}, {w:"欸", p:"ㄞˇ", d:"欸 (欸乃)"}],
+            [{w:"劬", p:"ㄑㄩˊ", d:"劬 (劬勞)"}, {w:"雊", p:"ㄍㄡˋ", d:"雊 (雉雊)"}, {w:"痀", p:"ㄐㄩ", d:"痀 (痀导)"}, {w:"姁", p:"ㄒㄩˇ", d:"姁 (姁姁)"}],
+            [{w:"槎", p:"ㄔㄚ", d:"槎 (木槎)"}, {w:"瘥", p:"ㄔㄞ", d:"瘥 (病瘥)"}, {w:"嵯", p:"ㄘㄨㄛ", d:"嵯 (嵯峨)"}],
+            [{w:"捋髭鬚", p:"ㄌㄨㄛ̄ ㄗ ㄒㄩ", d:"捋髭鬚"}, {w:"捋虎鬚", p:"ㄌㄨㄛ̄ ㄏㄨˇ ㄒㄩ", d:"捋虎鬚"}, {w:"揎拳捋袖", p:"ㄒㄩㄢ ㄑㄩㄢˊ ㄌㄨㄛ̄ ㄒㄧㄡˋ", d:"揎拳捋袖"}, {w:"埒", p:"ㄌㄧㄝˋ", d:"埒 (等埒)"}, {w:"酹", p:"ㄌㄟˋ", d:"酹 (酹酒)"}],
+            [{w:"隅", p:"ㄩ", d:"隅 (角落)"}, {w:"喁", p:"ㄩˊ", d:"喁 (喁喁)"}, {w:"顒", p:"ㄩㄥˊ", d:"顒 (顒顒)"}],
+            [{w:"帩", p:"ㄑㄧㄠˋ", d:"帩 (帩頭)"}, {w:"誚", p:"ㄑㄧㄠˋ", d:"誚 (誚讓)"}, {w:"綃", p:"ㄒㄧㄠ", d:"綃 (生綃)"}],
+            [{w:"逶", p:"ㄨㄟ", d:"逶 (逶迤)"}],
+            [{w:"峻", p:"ㄐㄩㄣ", d:"峻 (嚴峻)"}, {w:"浚", p:"ㄐㄩㄣ", d:"浚 (浚渫)"}, {w:"悛", p:"ㄑㄩㄢ", d:"悛 (悔悛)"}],
+            [{w:"毖", p:"ㄅㄧˋ", d:"毖 (懲前毖後)"}, {w:"毗", p:"ㄆㄧˊ", d:"毗 (毗鄰)"}, {w:"貔", p:"ㄆㄧ", d:"貔 (貔貅)"}],
+            [{w:"鏑", p:"ㄉㄧˊ", d:"鏑 (鳴鏑)"}, {w:"嘀", p:"ㄉㄧˊ", d:"嘀 (嘀咕)"}, {w:"擿", p:"ㄓˋ", d:"擿 (擿伏)"}],
+            [{w:"檄", p:"ㄒㄧˊ", d:"檄 (檄文)"}, {w:"弓繳", p:"ㄍㄨㄥ ㄓㄨㄛˊ", d:"弓繳"}],
+            [{w:"孚", p:"ㄈㄨˊ", d:"孚 (深孚眾望)"}, {w:"桴", p:"ㄈㄨˊ", d:"桴 (鼓桴)"}, {w:"莩", p:"ㄆㄧㄠˇ", d:"莩 (餓莩)"}],
+            [{w:"瞳", p:"ㄊㄨㄥˊ", d:"瞳 (瞳孔)"}, {w:"艟", p:"ㄊㄨㄥˊ", d:"艟 (艨艟)"}, {w:"幢", p:"ㄔㄨㄤˊ", d:"幢 (幢幢)"}],
+            [{w:"咷", p:"ㄊㄠ", d:"咷 (號咷)"}, {w:"洮", p:"ㄊㄠˊ", d:"洮 (洮米)"}, {w:"佻", p:"ㄊㄧㄠ", d:"佻 (輕佻)"}, {w:"晁", p:"ㄔㄠˊ", d:"晁 (姓氏)"}],
+            [{w:"竑", p:"ㄏㄨㄥˊ", d:"竑 (宏偉)"}, {w:"紘", p:"ㄏㄨㄥˊ", d:"紘 (冠紘)"}, {w:"閎", p:"ㄏㄨㄥˊ", d:"閎 (閎偉)"}],
+            [{w:"蹬", p:"ㄉㄥ", d:"蹬 (蹬腿)"}],
+            [{w:"綸", p:"ㄍㄨㄢ", d:"綸 (羽扇綸巾)"}, {w:"掄", p:"ㄌㄨㄣ", d:"掄 (掄拳)"}, {w:"淪", p:"ㄌㄨㄣ", d:"淪 (淪陷)"}],
+            [{w:"罍", p:"ㄌㄟˊ", d:"罍 (尊罍)"}, {w:"纍", p:"ㄌㄟˊ", d:"纍 (纍纍)"}, {w:"神荼鬱壘", p:"ㄕㄣ ㄕㄨ ㄩˋ ㄌㄩ MASTER", p:"ㄕㄣ ㄕㄨ ㄩˋ ㄌㄩˇ", d:"神荼鬱壘"}],
+            [{w:"掏", p:"ㄊㄠ", d:"掏 (掏腰包)"}],
+            [{w:"嫘", p:"ㄌㄟˊ", d:"嫘 (嫘祖)"}, {w:"縲", p:"ㄌㄟˊ", d:"縲 (縲紲)"}],
+            [{w:"舴", p:"ㄗㄜˊ", d:"舴 (舴艋)"}, {w:"怍", p:"ㄗㄨㄛˋ", d:"怍 (慚怍)"}, {w:"阼", p:"ㄗㄨㄛˋ", d:"阼 (阼階)"}, {w:"酢", p:"ㄗㄨㄛˋ", d:"酢 (酬酢)"}],
+            [{w:"儋", p:"ㄉㄢ", d:"儋 (儋州)"}, {w:"澹", p:"ㄉㄢˋ", d:"澹 (澹泊)"}],
+            [{w:"鈿", p:"ㄉㄧㄢˋ", d:"鈿 (釵鈿)"}, {w:"畦", p:"ㄑㄧˊ", d:"畦 (田畦)"}],
+            [{w:"洒", p:"ㄙㄚˇ", d:"洒 (洒水)"}, {w:"哂", p:"ㄕㄣˇ", d:"哂 (哂笑)"}],
+            [{w:"姮", p:"ㄏㄥˊ", d:"姮 (姮娥)"}, {w:"揎", p:"ㄒㄩㄢ", d:"揎 (揎袖)"}],
+            [{w:"摶", p:"ㄊㄨㄢˊ", d:"摶 (摶扶搖而上)"}]
+        ];
 
-        const phoneticDict = {
-            "椸": { pinyin: "ㄧˊ", phrase: "椸架" },
-            "施及": { char: "施", pinyin: "ㄧˋ", phrase: "施及" },
-            "麃": { pinyin: "ㄅㄧㄠ", phrase: "麃麃" },
-            "轆": { pinyin: "ㄌㄨˋ", phrase: "轆轤" },
-            "簏": { pinyin: "ㄌㄨˋ", phrase: "竹簏" },
-            "甃": { pinyin: "ㄓㄡˋ", phrase: "井甃" },
-            "湫": { pinyin: "ㄑㄧㄡ", phrase: "湫隘" },
-            "愀": { pinyin: "ㄑㄧㄠˇ", phrase: "愀然" },
-            "嘏": { pinyin: "ㄍㄨˇ", phrase: "祝嘏" },
-            "葭": { pinyin: "ㄐㄧㄚ", phrase: "蒹葭" },
-            "縐": { pinyin: "ㄓㄡˋ", phrase: "縐紗" },
-            "芻": { pinyin: "ㄔㄨ", phrase: "芻議" },
-            "謅": { pinyin: "ㄗㄡ", phrase: "胡謅" },
-            "罾": { pinyin: "ㄗㄥ", phrase: "魚罾" },
-            "矰": { pinyin: "ㄗㄥ", phrase: "矰繳" },
-            "甑": { pinyin: "ㄗㄥˋ", phrase: "甑塵釜魚" },
-            "亢": { pinyin: "ㄎㄤˋ", phrase: "高亢" },
-            "頏": { pinyin: "ㄏㄤˊ", phrase: "頡頏" },
-            "僦": { pinyin: "ㄐㄧㄡˋ", phrase: "僦屋" },
-            "憱": { pinyin: "ㄘㄨˋ", phrase: "憱爾" },
-            "蹴": { pinyin: "ㄘㄨˋ", phrase: "蹴踏" },
-            "邳": { pinyin: "ㄆㄟˊ", phrase: "邳州" },
-            "抔": { pinyin: "ㄆㄡˊ", phrase: "一抔土" },
-            "睥": { pinyin: "ㄅㄧˋ", phrase: "睥睨" },
-            "菲": { pinyin: "ㄈㄟ", phrase: "菲薄" },
-            "菲衣薄食": { char: "菲", pinyin: "ㄈㄟˇ", phrase: "菲衣薄食" },
-            "緋": { pinyin: "ㄈㄟ", phrase: "緋紅" },
-            "腓": { pinyin: "ㄈㄟˊ", phrase: "腓腸肌" },
-            "詘": { pinyin: "ㄑㄩ", phrase: "詰詘" },
-            "剄": { pinyin: "ㄐㄧㄥˇ", phrase: "自剄" },
-            "痙": { pinyin: "ㄐㄧㄥˋ", phrase: "痙攣" },
-            "磽": { pinyin: "ㄑㄧㄠ", phrase: "磽瘠" },
-            "蹺": { pinyin: "ㄑㄧㄠ", phrase: "蹺蹺板" },
-            "轓": { pinyin: "ㄈㄢ", phrase: "朱轓" },
-            "墦": { pinyin: "ㄈㄢˊ", phrase: "墦間" },
-            "播": { pinyin: "ㄅㄛˋ", phrase: "播種" },
-            "佁": { pinyin: "ㄧˇ", phrase: "佁然" },
-            "窬": { pinyin: "ㄩˊ", phrase: "穿窬" },
-            "遁": { pinyin: "ㄉㄨㄣˋ", phrase: "遁逃" },
-            "楯": { pinyin: "ㄕㄨㄣˇ", phrase: "欄楯" },
-            "哆": { pinyin: "ㄉㄨㄛ", phrase: "哆嗦" },
-            "披哆": { char: "哆", pinyin: "ㄔˇ", phrase: "披哆" },
-            "黟": { pinyin: "ㄧ", phrase: "黟縣" },
-            "扃": { pinyin: "ㄐㄧㄥ", phrase: "扃門" },
-            "齜": { pinyin: "ㄗ", phrase: "齜牙" },
-            "髭": { pinyin: "ㄗ", phrase: "髭鬚" },
-            "訾": { pinyin: "ㄗˇ", phrase: "訾議" },
-            "訾議": { char: "訾", pinyin: "ㄗˇ", phrase: "訾議" },
-            "財訾": { char: "訾", pinyin: "ㄗ", phrase: "財訾" },
-            "眥": { pinyin: "ㄗˋ", phrase: "眼眥" },
-            "閹": { pinyin: "ㄧㄢ", phrase: "閹割" },
-            "閹然": { char: "閹", pinyin: "ㄧㄢ", phrase: "閹然" },
-            "崦": { pinyin: "ㄧㄢ", phrase: "崦嵁" },
-            "雹": { pinyin: "ㄅㄠˊ", phrase: "冰雹" },
-            "匏": { pinyin: "ㄆㄠˊ", phrase: "匏瓜" },
-            "皰": { pinyin: "ㄆㄠˋ", phrase: "面皰" },
-            "枹": { pinyin: "ㄈㄨˊ", phrase: "鼓枹" },
-            "塿": { pinyin: "ㄌㄡˇ", phrase: "培塿" },
-            "培塿": { char: "塿", pinyin: "ㄌㄡˇ", phrase: "培塿" },
-            "簍": { pinyin: "ㄌㄡˇ", phrase: "竹簍" },
-            "鏤": { pinyin: "ㄌㄡˋ", phrase: "鏤刻" },
-            "窶": { pinyin: "ㄐㄩˋ", phrase: "貧窶" },
-            "咯": { pinyin: "ㄍㄜ", phrase: "咯咯" },
-            "咯血": { char: "咯", pinyin: "ㄎㄚˇ", phrase: "咯血" },
-            "蛉": { pinyin: "ㄌㄧㄥˊ", phrase: "螟蛉" },
-            "翎": { pinyin: "ㄌㄧㄥˊ", phrase: "羽翎" },
-            "嫵": { pinyin: "ㄨˇ", phrase: "嫵媚" },
-            "廡": { pinyin: "ㄨˇ", phrase: "廊廡" },
-            "憮": { pinyin: "ㄨˇ", phrase: "憮然" },
-            "憮然": { char: "憮", pinyin: "ㄨˇ", phrase: "憮然" },
-            "慳": { pinyin: "ㄑㄧㄢ", phrase: "慳吝" },
-            "韋": { pinyin: "ㄨㄟˊ", phrase: "韋編" },
-            "幃": { pinyin: "ㄨㄟˊ", phrase: "帷幃" },
-            "韙": { pinyin: "ㄨㄟˇ", phrase: "大不韙" },
-            "煒": { pinyin: "ㄨㄟˇ", phrase: "煒燁" },
-            "暐": { pinyin: "ㄨㄟˇ", phrase: "暐暐" },
-            "韞": { pinyin: "ㄩㄣˋ", phrase: "韞櫝" },
-            "刳": { pinyin: "ㄎㄨ", phrase: "刳木" },
-            "姱": { pinyin: "ㄎㄨㄚ", phrase: "姱容" },
-            "洿": { pinyin: "ㄨ", phrase: "洿池" },
-            "寥": { pinyin: "ㄌㄧㄠˊ", phrase: "寂寥" },
-            "僇": { pinyin: "ㄌㄨˋ", phrase: "僇人" },
-            "瘳": { pinyin: "ㄔㄡ", phrase: "痊瘳" },
-            "醪": { pinyin: "ㄌㄠˊ", phrase: "濁醪" },
-            "繆": { pinyin: "ㄇㄧㄡˋ", phrase: "荒謬" },
-            "山川相繆": { char: "繆", pinyin: "ㄌㄧㄠˊ", phrase: "山川相繆" },
-            "繆小姐": { char: "繆", pinyin: "ㄇㄧㄠˋ", phrase: "繆小姐" },
-            "綢繆": { char: "繆", pinyin: "ㄇㄡˊ", phrase: "綢繆" },
-            "蓼": { pinyin: "ㄌㄧㄠˇ", phrase: "紅蓼" },
-            "蓼莪": { char: "蓼", pinyin: "ㄌㄨˋ", phrase: "蓼莪" },
-            "紅蓼": { char: "蓼", pinyin: "ㄌㄧㄠˇ", phrase: "紅蓼" },
-            "倬": { pinyin: "ㄓㄨㄛ", phrase: "倬立" },
-            "踔": { pinyin: "ㄓㄨㄛ", phrase: "踔厲" },
-            "俎": { pinyin: "ㄗㄨˇ", phrase: "俎豆" },
-            "疽": { pinyin: "ㄐㄩ", phrase: "癰疽" },
-            "趄": { pinyin: "ㄐㄩ", phrase: "趑趄" },
-            "苴": { pinyin: "ㄐㄩ", phrase: "履苴" },
-            "齟": { pinyin: "ㄐㄩˇ", phrase: "齟齬" },
-            "咀": { pinyin: "ㄐㄩˇ", phrase: "咀嚼" },
-            "菹": { pinyin: "ㄗㄨ", phrase: "菹醢" },
-            "菹醢": { char: "菹", pinyin: "ㄗㄨ", phrase: "菹醢" },
-            "醅": { pinyin: "ㄆㄟ", phrase: "濁醅" },
-            "踣": { pinyin: "ㄅㄛˊ", phrase: "踣地" },
-            "培": { pinyin: "ㄆㄟˊ", phrase: "培育" },
-            "掊": { pinyin: "ㄆㄡˊ", phrase: "一掊土" },
-            "一掊土": { char: "掊", pinyin: "ㄆㄡˊ", phrase: "一掊土" },
-            "掊斗折衡": { char: "掊", pinyin: "ㄆㄡˇ", phrase: "掊斗折衡" },
-            "蹩": { pinyin: "ㄅㄧㄝˊ", phrase: "蹩腳" },
-            "餂": { pinyin: "ㄊㄧㄢˇ", phrase: "餂誘" },
-            "歆": { pinyin: "ㄒㄧㄣ", phrase: "歆羨" },
-            "諳": { pinyin: "ㄢ", phrase: "諳熟" },
-            "闇": { pinyin: "ㄢˋ", phrase: "闇練" },
-            "俛": { pinyin: "ㄈㄨˇ", phrase: "俛首" },
-            "浼": { pinyin: "ㄇㄟˇ", phrase: "浼托" },
-            "戧": { pinyin: "ㄑㄧㄤˋ", phrase: "戧金" },
-            "愴": { pinyin: "ㄔㄨㄤˋ", phrase: "悲愴" },
-            "傖": { pinyin: "ㄘㄤ", phrase: "傖俗" },
-            "赭": { pinyin: "ㄓㄜˇ", phrase: "赭石" },
-            "渚": { pinyin: "ㄓㄨˇ", phrase: "江渚" },
-            "翥": { pinyin: "ㄓㄨˋ", phrase: "翱翥" },
-            "楮": { pinyin: "ㄔㄨˇ", phrase: "楮幣" },
-            "妗": { pinyin: "ㄐㄧㄣˋ", phrase: "舅妗" },
-            "衾": { pinyin: "ㄑㄧㄣ", phrase: "衾枕" },
-            "鼴": { pinyin: "ㄧㄢˇ", phrase: "鼴鼠" },
-            "腊": { pinyin: "ㄒㄧ̄", phrase: "腊肉" },
-            "踖": { pinyin: "ㄐㄧˊ", phrase: "踖踖" },
-            "蜡": { pinyin: "ㄓㄚˋ", phrase: "蜡賓" },
-            "憒": { pinyin: "ㄎㄨㄟˋ", phrase: "昏憒" },
-            "懧": { pinyin: "ㄋㄨㄛˋ", phrase: "怯懧" },
-            "衢": { pinyin: "ㄑㄩ", phrase: "通衢" },
-            "癯": { pinyin: "ㄑㄩ", phrase: "清癯" },
-            "瞿": { pinyin: "ㄑㄩˊ", phrase: "瞿姓" },
-            "瞿先生": { char: "瞿", pinyin: "ㄑㄩˊ", phrase: "瞿先生" },
-            "瞿然": { char: "瞿", pinyin: "ㄐㄩˋ", phrase: "瞿然" },
-            "攫": { pinyin: "ㄐㄩㄝˊ", phrase: "攫取" },
-            "帑": { pinyin: "ㄊㄤˇ", phrase: "帑藏" },
-            "呶": { pinyin: "ㄋㄠˊ", phrase: "呶呶" },
-            "孥": { pinyin: "ㄋㄨˊ", phrase: "妻孥" },
-            "邅": { pinyin: "ㄓㄢ", phrase: "邅回" },
-            "饘": { pinyin: "ㄓㄢ", phrase: "饘粥" },
-            "蟺": { pinyin: "ㄕㄢ", phrase: "蚯蟺" },
-            "驁": { pinyin: "ㄠˊ", phrase: "桀驁" },
-            "聱": { pinyin: "ㄠˊ", phrase: "聱牙" },
-            "庋": { pinyin: "ㄍㄨㄟˇ", phrase: "庋藏" },
-            "跂": { pinyin: "ㄑㄧˇ", phrase: "跂望" },
-            "忮": { pinyin: "ㄓˋ", phrase: "忮求" },
-            "梧": { pinyin: "ㄨˊ", phrase: "梧桐" },
-            "寤": { pinyin: "ㄨˋ", phrase: "寤寐" },
-            "圄": { pinyin: "ㄩˇ", phrase: "囹圄" },
-            "齬": { pinyin: "ㄩˇ", phrase: "齟齬" },
-            "縞": { pinyin: "ㄍㄠˇ", phrase: "縞素" },
-            "嚆": { pinyin: "ㄏㄠ", phrase: "嚆矢" },
-            "皜": { pinyin: "ㄏㄠˋ", phrase: "皜皜" },
-            "鎬": { pinyin: "ㄏㄠˇ", phrase: "鎬京" },
-            "廋": { pinyin: "ㄙㄡ", phrase: "廋詞" },
-            "庾": { pinyin: "ㄩˇ", phrase: "倉庾" },
-            "蹇": { pinyin: "ㄐㄧㄢˇ", phrase: "蹇滯" },
-            "謇": { pinyin: "ㄐㄧㄢˇ", phrase: "謇謇" },
-            "騫": { pinyin: "ㄑㄧㄢ", phrase: "騫騰" },
-            "搴": { pinyin: "ㄑㄧㄢ", phrase: "搴旗" },
-            "褰": { pinyin: "ㄑㄧㄢ", phrase: "褰裳" },
-            "闐": { pinyin: "ㄊㄧㄢˊ", phrase: "闐寂" },
-            "瑱": { pinyin: "ㄊㄧㄢˋ", phrase: "玉瑱" },
-            "瞋": { pinyin: "ㄔㄣ", phrase: "瞋目" },
-            "嗔": { pinyin: "ㄔㄣ", phrase: "嗔怪" },
-            "鯫": { pinyin: "ㄗㄡ", phrase: "鯫生" },
-            "諏": { pinyin: "ㄗㄡ", phrase: "諮諏" },
-            "陬": { pinyin: "ㄗㄡ", phrase: "角落" },
-            "黥": { pinyin: "ㄑㄧㄥˊ", phrase: "黥刑" },
-            "黔": { pinyin: "ㄑㄧㄢˊ", phrase: "黔首" },
-            "啗": { pinyin: "ㄉㄢˋ", phrase: "啗食" },
-            "萏": { pinyin: "ㄉㄢˋ", phrase: "菡萏" },
-            "閻": { pinyin: "ㄧㄢˊ", phrase: "閻羅" },
-            "儔": { pinyin: "ㄔㄡˊ", phrase: "儔類" },
-            "擣": { pinyin: "ㄉㄠˇ", phrase: "擣衣" },
-            "鑄": { pinyin: "ㄓㄨˋ", phrase: "鑄造" },
-            "鬑": { pinyin: "ㄌㄧㄢˊ", phrase: "鬑鬑" },
-            "髡": { pinyin: "ㄎㄨㄣ", phrase: "髡刑" },
-            "裾": { pinyin: "ㄐㄩ", phrase: "裙裾" },
-            "据": { pinyin: "ㄐㄩ", phrase: "拮据" },
-            "琚": { pinyin: "ㄐㄩ", phrase: "佩琚" },
-            "踞": { pinyin: "ㄐㄩˋ", phrase: "盤踞" },
-            "倨": { pinyin: "ㄐㄩˋ", phrase: "倨傲" },
-            "觭": { pinyin: "ㄐㄧ", phrase: "觭輪" },
-            "掎": { pinyin: "ㄐㄧˇ", phrase: "掎角之勢" },
-            "踦": { pinyin: "ㄐㄧ", phrase: "踦閭" },
-            "遽": { pinyin: "ㄐㄩˋ", phrase: "急遽" },
-            "噱": { pinyin: "ㄐㄩㄝˊ", phrase: "發噱" },
-            "發噱": { char: "噱", pinyin: "ㄐㄩㄝˊ", phrase: "發噱" },
-            "璩": { pinyin: "ㄑㄩˊ", phrase: "玉璩" },
-            "顓": { pinyin: "ㄓㄨㄢ", phrase: "顓頊" },
-            "遄": { pinyin: "ㄔㄨㄢˊ", phrase: "遄往" },
-            "曷": { pinyin: "ㄏㄜˊ", phrase: "曷勝" },
-            "愒": { pinyin: "ㄎㄞˋ", phrase: "玩歲愒日" },
-            "垓": { pinyin: "ㄍㄞ", phrase: "垓下" },
-            "欬": { pinyin: "ㄎㄞˋ", phrase: "謦欬" },
-            "謦欬": { char: "欬", pinyin: "ㄎㄞˋ", phrase: "謦欬" },
-            "頦": { pinyin: "ㄏㄞˊ", phrase: "頷頦" },
-            "倡": { pinyin: "ㄔㄤ", phrase: "倡優" },
-            "倡優": { char: "倡", pinyin: "ㄔㄤ", phrase: "倡優" },
-            "娼": { pinyin: "ㄔㄤ", phrase: "娼妓" },
-            "拂": { pinyin: "ㄈㄨˊ", phrase: "拂袖" },
-            "怫": { pinyin: "ㄈㄨˊ", phrase: "怫然" },
-            "胛": { pinyin: "ㄐㄧㄚˇ", phrase: "肩胛" },
-            "匣": { pinyin: "ㄒㄧㄚˊ", phrase: "木匣" },
-            "湄": { pinyin: "ㄇㄟˊ", phrase: "水湄" },
-            "齎": { pinyin: "ㄐㄧ", phrase: "齎志" },
-            "虀": { pinyin: "ㄐㄧ", phrase: "斷虀畫粥" },
-            "薺": { pinyin: "ㄐㄧˋ", phrase: "薺菜" },
-            "槊": { pinyin: "ㄕㄨㄛˋ", phrase: "橫槊" },
-            "晡": { pinyin: "ㄅㄨ", phrase: "晡時" },
-            "逋": { pinyin: "ㄅㄨ", phrase: "逋逃" },
-            "餔": { pinyin: "ㄅㄨ", phrase: "餔啜" },
-            "脯": { pinyin: "ㄈㄨˇ", phrase: "肉脯" },
-            "蒹": { pinyin: "ㄐㄧㄢ", phrase: "蒹葭" },
-            "縑": { pinyin: "ㄐㄧㄢ", phrase: "縑帛" },
-            "慊": { pinyin: "ㄑㄧㄢˋ", phrase: "慊慊" },
-            "慊慊": { char: "慊", pinyin: "ㄑㄧㄢˋ", phrase: "慊慊" },
-            "不慊於心": { char: "慊", pinyin: "ㄑㄧㄝˋ", phrase: "不慊於心" },
-            "羝": { pinyin: "ㄉㄧ", phrase: "羝羊" },
-            "坻": { pinyin: "ㄔˊ", phrase: "渚坻" },
-            "詆": { pinyin: "ㄉㄧˇ", phrase: "詆毀" },
-            "豳": { pinyin: "ㄅㄧㄣ", phrase: "豳風" },
-            "遯": { pinyin: "ㄉㄨㄣˋ", phrase: "遯世" },
-            "圂": { pinyin: "ㄏㄨㄣˋ", phrase: "豬圂" },
-            "燹": { pinyin: "ㄒㄧㄢˇ", phrase: "兵燹" },
-            "豕": { pinyin: "ㄕˇ", phrase: "豕突" },
-            "酹": { pinyin: "ㄌㄟˋ", phrase: "奠酹" },
-            "醨": { pinyin: "ㄌㄧˊ", phrase: "薄醨" },
-            "倔": { pinyin: "ㄐㄩㄝˊ", phrase: "倔強" },
-            "倔強": { char: "倔", pinyin: "ㄐㄩㄝˊ", phrase: "倔強" },
-            "淈": { pinyin: "ㄍㄨˇ", phrase: "淈泥" },
-            "涘": { pinyin: "ㄙˋ", phrase: "水涘" },
-            "俟": { pinyin: "ㄙˋ", phrase: "俟機" },
-            "騃": { pinyin: "ㄞˊ", phrase: "騃呆" },
-            "欸": { pinyin: "ㄞˇ", phrase: "欸乃" },
-            "劬": { pinyin: "ㄑㄩˊ", phrase: "劬勞" },
-            "雊": { pinyin: "ㄍㄡˋ", phrase: "雉雊" },
-            "痀": { pinyin: "ㄐㄩ", phrase: "痀僂" },
-            "姁": { pinyin: "ㄒㄩˇ", phrase: "姁姁" },
-            "槎": { pinyin: "ㄔㄚ", phrase: "木槎" },
-            "瘥": { pinyin: "ㄔㄞ", phrase: "病瘥" },
-            "嵯": { pinyin: "ㄘㄨㄛ", phrase: "嵯峨" },
-            "捋": { pinyin: "ㄌㄨㄛ̄", phrase: "捋鬚" },
-            "捋髭鬚": { char: "捋", pinyin: "ㄌㄨㄛ̄", phrase: "捋髭鬚" },
-            "捋虎鬚": { char: "捋", pinyin: "ㄌㄨㄛ̄", phrase: "捋虎鬚" },
-            "揎拳捋袖": { char: "捋", pinyin: "ㄌㄨㄛ̄", phrase: "揎拳捋袖" },
-            "埒": { pinyin: "ㄌㄧㄝˋ", phrase: "等埒" },
-            "隅": { pinyin: "ㄩ", phrase: "角落" },
-            "喁": { pinyin: "ㄩˊ", phrase: "喁喁" },
-            "顒": { pinyin: "ㄩㄥˊ", phrase: "顒顒" },
-            "帩": { pinyin: "ㄑㄧㄠˋ", phrase: "帩頭" },
-            "誚": { pinyin: "ㄑㄧㄠˋ", phrase: "誚讓" },
-            "綃": { pinyin: "ㄒㄧㄠ", phrase: "生綃" },
-            "逶": { pinyin: "ㄨㄟ", phrase: "逶迤" },
-            "峻": { pinyin: "ㄐㄩㄣ", phrase: "嚴峻" },
-            "浚": { pinyin: "ㄐㄩㄣ", phrase: "浚渫" },
-            "悛": { pinyin: "ㄑㄩㄢ", phrase: "悔悛" },
-            "毖": { pinyin: "ㄅㄧˋ", phrase: "懲前毖後" },
-            "毗": { pinyin: "ㄆㄧˊ", phrase: "毗鄰" },
-            "貔": { pinyin: "ㄆㄧ", phrase: "貔貅" },
-            "鏑": { pinyin: "ㄉㄧˊ", phrase: "鳴鏑" },
-            "嘀": { pinyin: "ㄉㄧˊ", phrase: "嘀咕" },
-            "擿": { pinyin: "ㄓˋ", phrase: "擿伏" },
-            "檄": { pinyin: "ㄒㄧˊ", phrase: "檄文" },
-            "繳": { pinyin: "ㄓㄨㄛˊ", phrase: "弓繳" },
-            "弓繳": { char: "繳", pinyin: "ㄓㄨㄛˊ", phrase: "弓繳" },
-            "孚": { pinyin: "ㄈㄨˊ", phrase: "深孚" },
-            "桴": { pinyin: "ㄈㄨˊ", phrase: "鼓桴" },
-            "莩": { pinyin: "ㄆㄧㄠˇ", phrase: "餓莩" },
-            "瞳": { pinyin: "ㄊㄨㄥˊ", phrase: "瞳孔" },
-            "艟": { pinyin: "ㄊㄨㄥˊ", phrase: "艨艟" },
-            "幢": { pinyin: "ㄔㄨㄤˊ", phrase: "幢幢" },
-            "咷": { pinyin: "ㄊㄠ", phrase: "號咷" },
-            "洮": { pinyin: "ㄊㄠˊ", phrase: "洮米" },
-            "佻": { pinyin: "ㄊㄧㄠ", phrase: "輕佻" },
-            "晁": { pinyin: "ㄔㄠˊ", phrase: "晁氏" },
-            "竑": { pinyin: "ㄏㄨㄥˊ", phrase: "竑偉" },
-            "紘": { pinyin: "ㄏㄨㄥˊ", phrase: "冠紘" },
-            "閎": { pinyin: "ㄏㄨㄥˊ", phrase: "閎偉" },
-            "蹬": { pinyin: "ㄉㄥ", phrase: "蹬腿" },
-            "綸": { pinyin: "ㄍㄨㄢ", phrase: "羽扇綸巾" },
-            "掄": { pinyin: "ㄌㄨㄣ", phrase: "掄拳" },
-            "淪": { pinyin: "ㄌㄨㄣ", phrase: "淪陷" },
-            "罍": { pinyin: "ㄌㄟˊ", phrase: "尊罍" },
-            "纍": { pinyin: "ㄌㄟˊ", phrase: "纍纍" },
-            "壘": { pinyin: "ㄌㄩˇ", phrase: "神荼鬱壘" },
-            "神荼鬱壘": { char: "壘", pinyin: "ㄌㄩˇ", phrase: "神荼鬱壘" },
-            "掏": { pinyin: "ㄊㄠ", phrase: "掏腰包" },
-            "嫘": { pinyin: "ㄌㄟˊ", phrase: "嫘祖" },
-            "縲": { pinyin: "ㄌㄟˊ", phrase: "縲紲" },
-            "舴": { pinyin: "ㄗㄜˊ", phrase: "舴艋" },
-            "怍": { pinyin: "ㄗㄨㄛˋ", phrase: "慚怍" },
-            "阼": { pinyin: "ㄗㄨㄛˋ", phrase: "阼階" },
-            "酢": { pinyin: "ㄗㄨㄛˋ", phrase: "酬酢" },
-            "儋": { pinyin: "ㄉㄢ", phrase: "儋州" },
-            "澹": { pinyin: "ㄉㄢˋ", phrase: "澹泊" },
-            "鈿": { pinyin: "ㄉㄧㄢˋ", phrase: "釵鈿" },
-            "畦": { pinyin: "ㄑㄧˊ", phrase: "田畦" },
-            "洒": { pinyin: "ㄙㄚˇ", phrase: "洒水" },
-            "哂": { pinyin: "ㄕㄣˇ", phrase: "哂笑" },
-            "姮": { pinyin: "ㄏㄥˊ", phrase: "姮娥" },
-            "揎": { pinyin: "ㄒㄩㄢ", phrase: "揎袖" },
-            "摶": { pinyin: "ㄊㄨㄢˊ", phrase: "摶扶搖" }
+        // 扁平化並去重建立 Flashcard List
+        let allItems = [];
+        const seen = new Set();
+        rawGroups.forEach(group => {
+            group.forEach(item => {
+                if (!seen.has(item.w)) {
+                    seen.add(item.w);
+                    allItems.push(item);
+                }
+            });
+        });
+
+        // Flashcard 狀態
+        let unlearned = [...allItems];
+        let learned = [];
+        let currentFCIndex = 0;
+
+        // Quiz 狀態
+        let currentQuiz = null;
+
+        // --- 初始化頁面 ---
+        window.onload = function() {
+            updateFCDisplay();
+            generateQuiz();
         };
 
-        function parseRawTextToClusters(text) {
-            const lines = text.split('\n');
-            const clusters = [];
-
-            for (let line of lines) {
-                line = line.trim();
-                if (!line || line === "字音") continue;
-
-                let rowItems = [];
-                let i = 0;
-                while (i < line.length) {
-                    if (line[i] === '（') {
-                        let endIdx = line.indexOf('）', i);
-                        if (endIdx !== -1) {
-                            let content = line.substring(i + 1, endIdx);
-                            let subParts = content.split('／');
-                            for (let part of subParts) {
-                                part = part.trim();
-                                if (part) {
-                                    rowItems.push(part);
-                                }
-                            }
-                            i = endIdx + 1;
-                            continue;
-                        }
-                    }
-                    
-                    let char = line[i];
-                    if (char !== '／' && char !== ' ' && char !== '（' && char !== '）') {
-                        // Avoid duplicating base char if followed immediately by parentheses explaining it
-                        if (line[i + 1] !== '（') {
-                            rowItems.push(char);
-                        }
-                    }
-                    i++;
-                }
-
-                let mappedCluster = [];
-                for (let itemStr of rowItems) {
-                    let info = phoneticDict[itemStr];
-                    if (info) {
-                        mappedCluster.push({
-                            targetChar: info.char || (itemStr.length === 1 ? itemStr : itemStr[0]),
-                            phrase: info.phrase || itemStr,
-                            pinyin: info.pinyin,
-                            rawKey: itemStr
-                        });
-                    } else {
-                        let char = itemStr[0];
-                        mappedCluster.push({
-                            targetChar: char,
-                            phrase: itemStr,
-                            pinyin: "未知",
-                            rawKey: itemStr
-                        });
-                    }
-                }
-
-                if (mappedCluster.length > 0) {
-                    clusters.push(mappedCluster);
-                }
-            }
-            return clusters;
-        }
-
-        let currentClusters = [];
-        let flashcardList = [];
-        let learnedList = [];
-        let fcIndex = 0;
-        let currentQuizData = null;
-
-        function switchTab(tab) {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-
-            if (tab === 'flashcard') {
-                document.querySelectorAll('.nav-tab')[0].classList.add('active');
-                document.getElementById('flashcard-section').classList.add('active');
+        // --- 切換分頁 ---
+        function switchMode(mode) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.mode-section').forEach(s => s.classList.remove('active'));
+            
+            if (mode === 'flashcard') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('flashcard-mode').classList.add('active');
             } else {
-                document.querySelectorAll('.nav-tab')[1].classList.add('active');
-                document.getElementById('quiz-section').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('quiz-mode').classList.add('active');
             }
         }
 
-        function initData(rawText) {
-            currentClusters = parseRawTextToClusters(rawText);
-            flashcardList = [];
-            learnedList = [];
-            const seen = new Set();
+        // --- Flashcard 邏輯 ---
+        function updateFCDisplay() {
+            document.getElementById('fc-progress').innerText = 
+                `剩餘未熟練：${unlearned.length} / 已學會：${learned.length}`;
 
-            currentClusters.forEach(cluster => {
-                cluster.forEach(item => {
-                    const key = item.phrase + "_" + item.targetChar;
-                    if (!seen.has(key)) {
-                        seen.add(key);
-                        flashcardList.push(item);
-                    }
-                });
-            });
-
-            fcIndex = 0;
-            updateFlashcardUI();
-            generateQuiz();
-        }
-
-        function updateFlashcardUI() {
-            document.getElementById('count-pending').innerText = `還沒會：${flashcardList.length}`;
-            document.getElementById('count-done').innerText = `已經會：${learnedList.length}`;
-
-            const card = document.getElementById('fc-card');
+            const card = document.getElementById('flashcard');
             card.classList.remove('flipped');
 
-            if (flashcardList.length === 0) {
-                document.getElementById('fc-word').innerText = "🎉 已全部學會";
-                document.getElementById('fc-pinyin').innerText = "太棒了！";
-                document.getElementById('fc-phrase').innerText = "您可以貼上新的文字進度繼續練習。";
+            if (unlearned.length === 0) {
+                document.getElementById('fc-word').innerText = "🎉 全數完畢！";
+                document.getElementById('fc-pinyin').innerText = "太棒了";
+                document.getElementById('fc-detail').innerText = "您已經學會此範圍的所有字音！";
                 return;
             }
 
-            if (fcIndex >= flashcardList.length) fcIndex = 0;
+            if (currentFCIndex >= unlearned.length) {
+                currentFCIndex = 0;
+            }
 
-            const item = flashcardList[fcIndex];
-            document.getElementById('fc-word').innerText = item.phrase;
-            document.getElementById('fc-pinyin').innerText = item.pinyin;
-            document.getElementById('fc-phrase').innerText = `「${item.targetChar}」${item.phrase}`;
+            const item = unlearned[currentFCIndex];
+            document.getElementById('fc-word').innerText = item.w;
+            document.getElementById('fc-pinyin').innerText = item.p;
+            document.getElementById('fc-detail').innerText = item.d;
         }
 
-        function flipFlashcard() {
-            document.getElementById('fc-card').classList.toggle('flipped');
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
         }
 
-        function answerFlashcard(isKnow) {
-            if (flashcardList.length === 0) return;
+        function markCard(isKnow) {
+            if (unlearned.length === 0) return;
 
-            const current = flashcardList.splice(fcIndex, 1)[0];
+            const item = unlearned.splice(currentFCIndex, 1)[0];
             if (isKnow) {
-                learnedList.push(current);
+                learned.push(item);
             } else {
-                flashcardList.push(current);
+                unlearned.push(item); // 放回隊尾
             }
-            updateFlashcardUI();
+            updateFCDisplay();
         }
 
-        function exportText() {
-            // Export remaining unlearned items grouped back into lines matching original format
-            const unlearnedKeys = new Set(flashcardList.map(i => i.rawKey));
-            let lines = ["字音"];
-            currentClusters.forEach(cluster => {
-                let rowStr = "";
-                cluster.forEach(item => {
-                    if (unlearnedKeys.has(item.rawKey)) {
-                        if (item.rawKey.length > 1) {
-                            rowStr += `（${item.rawKey}）`;
-                        } else {
-                            rowStr += item.rawKey;
-                        }
+        // 匯出 / 匯入
+        function exportData() {
+            const data = { unlearned, learned };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "phonetic_progress.json";
+            a.click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.unlearned && data.learned) {
+                        unlearned = data.unlearned;
+                        learned = data.learned;
+                        currentFCIndex = 0;
+                        updateFCDisplay();
+                        alert("進度載入成功！");
                     }
-                });
-                if (rowStr) lines.push(rowStr);
-            });
-
-            const resultText = lines.join('\n');
-            document.getElementById('io-textarea').value = resultText;
-            navigator.clipboard.writeText(resultText).then(() => {
-                alert("已複製目前未學會的範圍文字至剪貼簿！");
-            }).catch(() => {
-                alert("已產生文字於下方框內，請直接選取複製。");
-            });
-        }
-
-        function importText() {
-            const val = document.getElementById('io-textarea').value.trim();
-            if (!val) {
-                alert("請先貼上文字！");
-                return;
-            }
-            initData(val);
-            alert("匯入成功！已更新 Flashcard 與練習題目。");
-        }
-
-        function generateQuiz() {
-            const validClusters = currentClusters.filter(c => c.length >= 2);
-            if (validClusters.length === 0) {
-                document.getElementById('quiz-question-display').innerText = "資料不足以出題";
-                return;
-            }
-
-            const cluster = validClusters[Math.floor(Math.random() * validClusters.length)];
-            let idx1 = Math.floor(Math.random() * cluster.length);
-            let idx2 = Math.floor(Math.random() * cluster.length);
-            while (idx1 === idx2) {
-                idx2 = Math.floor(Math.random() * cluster.length);
-            }
-
-            const item1 = cluster[idx1];
-            const item2 = cluster[idx2];
-            const isSame = (item1.pinyin === item2.pinyin);
-
-            currentQuizData = { item1, item2, isSame };
-
-            function buildFormattedPhrase(item) {
-                if (item.phrase.includes(item.targetChar)) {
-                    return item.phrase.replace(item.targetChar, `「${item.targetChar}」`);
+                } catch (err) {
+                    alert("檔案格式錯誤！");
                 }
-                return `「${item.targetChar}」${item.phrase}`;
-            }
-
-            const text1 = buildFormattedPhrase(item1);
-            const text2 = buildFormattedPhrase(item2);
-
-            document.getElementById('quiz-question-display').innerHTML = `題目：${text1}／${text2}`;
-            document.getElementById('quiz-result-box').style.display = 'none';
-            document.getElementById('quiz-btn-row').style.display = 'flex';
+            };
+            reader.readAsText(file);
         }
 
-        function submitQuiz(userChoice) {
-            const isCorrect = (userChoice === currentQuizData.isSame);
-            const resultBox = document.getElementById('quiz-result-box');
-            const resultStatus = document.getElementById('quiz-result-status');
-            const resultDetail = document.getElementById('quiz-result-detail');
+        // --- 是非題 Quiz 邏輯 ---
+        function generateQuiz() {
+            // 選取一個至少有2個元素的橫排
+            const validGroups = rawGroups.filter(g => g.length >= 2);
+            const selectedGroup = validGroups[Math.floor(Math.random() * validGroups.length)];
+
+            // 隨機取出橫排中的兩個元素
+            let idx1 = Math.floor(Math.random() * selectedGroup.length);
+            let idx2 = Math.floor(Math.random() * selectedGroup.length);
+            while (idx1 === idx2) {
+                idx2 = Math.floor(Math.random() * selectedGroup.length);
+            }
+
+            const item1 = selectedGroup[idx1];
+            const item2 = selectedGroup[idx2];
+
+            // 判斷兩者讀音是否完全相同 (以主要聲調/拼音是否相同判斷)
+            const isSame = item1.p === item2.p;
+
+            currentQuiz = { item1, item2, isSame };
+
+            // 渲染介面
+            document.getElementById('quiz-target-text').innerText = `${item1.w}  與  ${item2.w}`;
+            document.getElementById('quiz-result').style.display = 'none';
+            document.getElementById('quiz-btns').style.display = 'flex';
+        }
+
+        function submitAnswer(userAnswer) {
+            const isCorrect = (userAnswer === currentQuiz.isSame);
+            const resultBox = document.getElementById('quiz-result');
+            const statusBox = document.getElementById('quiz-status');
+            const detailBox = document.getElementById('quiz-detail');
 
             resultBox.style.display = 'block';
-            document.getElementById('quiz-btn-row').style.display = 'none';
+            document.getElementById('quiz-btns').style.display = 'none';
 
             if (isCorrect) {
-                resultBox.className = "result-box correct";
-                resultStatus.innerHTML = "⭕ 答對了！";
+                resultBox.className = 'quiz-result correct';
+                statusBox.innerText = "⭕ 答對了！";
             } else {
-                resultBox.className = "result-box wrong";
-                resultStatus.innerHTML = "❌ 答錯了！";
+                resultBox.className = 'quiz-result wrong';
+                statusBox.innerText = "❌ 答錯囉！";
             }
 
-            const item1 = currentQuizData.item1;
-            const item2 = currentQuizData.item2;
-
-            resultDetail.innerHTML = `
-                <div>• <strong>「${item1.targetChar}」</strong>（${item1.phrase}）：讀音為 <span style="color:#ef4444; font-weight:bold;">${item1.pinyin}</span></div>
-                <div>• <strong>「${item2.targetChar}」</strong>（${item2.phrase}）：讀音為 <span style="color:#ef4444; font-weight:bold;">${item2.pinyin}</span></div>
-                <div style="margin-top: 8px; font-weight:700; color:#1e293b;">
-                    正確結果：兩字讀音 ${currentQuizData.isSame ? "【相同 ⭕】" : "【不同 ❌】"}
-                </div>
+            detailBox.innerHTML = `
+                <div><strong>【${currentQuiz.item1.w}】</strong> 讀音：<span style="color:red;">${currentQuiz.item1.p}</span> (${currentQuiz.item1.d})</div>
+                <div><strong>【${currentQuiz.item2.w}】</strong> 讀音：<span style="color:red;">${currentQuiz.item2.p}</span> (${currentQuiz.item2.d})</div>
+                <div style="margin-top:8px; font-weight:bold;">兩者讀音：${currentQuiz.isSame ? "相同 ⭕" : "不同 ❌"}</div>
             `;
         }
 
-        window.onload = function() {
-            initData(defaultRawText);
-        };
+        function nextQuiz() {
+            generateQuiz();
+        }
     </script>
 </body>
 </html>
